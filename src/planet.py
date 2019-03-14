@@ -3,8 +3,8 @@
 from enum import Enum, unique
 from typing import List, Optional, Tuple, Dict
 
-
 # IMPORTANT NOTE: DO NOT IMPORT THE ev3dev.ev3 MODULE IN THIS FILE
+
 
 @unique
 class Direction(Enum):
@@ -17,7 +17,7 @@ class Direction(Enum):
 
 # simple alias, no magic here
 Weight = int
-""" 
+"""
     Weight of a given path (received from the server)
     value:  -1 if blocked path
             >0 for all other paths
@@ -33,9 +33,15 @@ class Planet:
     def __init__(self):
         """ Initializes the data structure """
         self.target = None
+        self.paths = {}
 
-    def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
-                 weight: int):
+
+# ((a, b), c)
+# start[1]
+#d.update({key:value})
+
+    def add_path(self, start: Tuple[Tuple[int, int], Direction],
+                 target: Tuple[Tuple[int, int], Direction], weight: int):
         """
          Adds a bidirectional path defined between the start and end coordinates to the map and assigns the weight to it
         example:
@@ -45,9 +51,24 @@ class Planet:
         :param weight: Integer
         :return: void
         """
-        pass
+        if start[0] in self.paths:
+            # node in dict
+            destination = (target[0], start[1], weight)
+            self.paths[start[0]].append(destination)
+            pass
+        else:
+            # add node to dict
+            destination = []
+            destination.append((target[0], start[1], weight))
+            self.paths.update({start[0]: destination})
 
-    def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
+    def getBilloPaths(self):
+        return self.paths
+
+    def get_paths(
+            self
+    ) -> Dict[Tuple[int, int],
+              Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
         Returns all paths
         example:
@@ -67,8 +88,8 @@ class Planet:
         """
         pass
 
-    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
-        List[Tuple[Tuple[int, int], Direction]]]:
+    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]
+                      ) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
         examples:
