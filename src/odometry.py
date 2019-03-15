@@ -21,10 +21,43 @@ def drive(bs,f):
 		mr.command = "run-forever"
 		ml.command = "run-forever"
 		time.sleep(0.1)
-		if colorsum > 500:
+		
+		if colorsum > 600: #Linie wurde verlassen
+			#Sound.tone([(1661,75,100),(1661,75,100),(2217,75,75),(1661,75,100)]).wait()
 			mr.stop()
 			ml.stop()
-			break
+			n=0
+			while n<5:
+				colorsum = colorsum = cs.bin_data("hhh")[0] + cs.bin_data("hhh")[1] + cs.bin_data("hhh")[2]
+				if(colorsum < 250):
+					n = -1000
+					break
+				mr.speed_sp = 100
+				ml.speed_sp = -100
+				mr.command = "run-forever"
+				ml.command = "run-forever"
+				n += 1
+				time.sleep(0.1)
+			while n > -5:
+				colorsum = colorsum = cs.bin_data("hhh")[0] + cs.bin_data("hhh")[1] + cs.bin_data("hhh")[2]
+				if(colorsum < 250):
+					n = -1000
+					break
+				mr.speed_sp = -100
+				ml.speed_sp = 100
+				mr.command = "run-forever"
+				ml.command = "run-forever"
+				n -= 1
+				time.sleep(0.1)
+			
+				
+		
+				
+				
+				
+			"""mr.stop()
+			ml.stop()
+			break"""
 
 #  Suggestion: 	implement odometry as class that is not using the ev3dev.ev3 package
 # 				establish value exchange with main driving class via getters and setters
