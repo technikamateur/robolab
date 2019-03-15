@@ -53,13 +53,13 @@ class Planet:
         """
         if start[0] in self.paths:
             # node in dict
-            destination = (target[0], start[1], weight)
-            self.paths[start[0]].append(destination)
-            pass
+            destination = {start[1]: [target[0], target[1], weight]}
+            self.paths[start[0]].update(destination)
+
         else:
             # add node to dict
-            destination = []
-            destination.append((target[0], start[1], weight))
+            destination = {}
+            destination.update({start[1]: [target[0], target[1], weight]})
             self.paths.update({start[0]: destination})
 
     def getBilloPaths(self):
@@ -86,7 +86,7 @@ class Planet:
             }
         :return: Dict
         """
-        pass
+        return self.paths
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]
                       ) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
