@@ -17,6 +17,7 @@ test.add_path(((0, 0), Direction.EAST), ((1, 0), Direction.WEST), 1)
 test.add_path(((0, 0), Direction.SOUTH), ((0, 1), Direction.SOUTH), 2)
 test.add_path(((0, 1), Direction.EAST), ((1, 1), Direction.WEST), 3)
 test.add_path(((1, 0), Direction.SOUTH), ((1, 1), Direction.NORTH), 6)
+test.add_path(((0, 0), Direction.NORTH), ((0, 0), Direction.WEST), 2)
 
 pretty(test.get_paths())
 print("\n")
