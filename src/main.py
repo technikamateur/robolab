@@ -22,7 +22,7 @@ def run():
     # the execution of all code shall be started from within this function
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER
     print("Hello World!")
-    od.drive()
+    od.drive(100,1)
 
 
 # DO NOT EDIT
