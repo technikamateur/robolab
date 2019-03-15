@@ -51,16 +51,22 @@ class Planet:
         :param weight: Integer
         :return: void
         """
-        if start[0] in self.paths:
-            # node in dict
-            destination = {start[1]: [target[0], target[1], weight]}
-            self.paths[start[0]].update(destination)
+        if weight > 0:
+            if start[0] in self.paths:
+                # node in dict
+                destination = {start[1]: [target[0], target[1], weight]}
+                self.paths[start[0]].update(destination)
 
+            else:
+                # add node to dict
+                destination = {}
+                destination.update({start[1]: [target[0], target[1], weight]})
+                self.paths.update({start[0]: destination})
+        elif weight == -1:
+            # if path is blocked
+            pass
         else:
-            # add node to dict
-            destination = {}
-            destination.update({start[1]: [target[0], target[1], weight]})
-            self.paths.update({start[0]: destination})
+            print("Ooops. Die Pfadangabe war nicht korrekt!")
 
     def get_paths(
             self
@@ -96,4 +102,9 @@ class Planet:
         :param target: 2-Tuple
         :return: List, Direction
         """
+        currentNode = start
+        while current_node != target:
+            print("Ich habe es versucht...")
+            currentNode = target
+
         return None
