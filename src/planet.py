@@ -62,9 +62,6 @@ class Planet:
             destination.update({start[1]: [target[0], target[1], weight]})
             self.paths.update({start[0]: destination})
 
-    def getBilloPaths(self):
-        return self.paths
-
     def get_paths(
             self
     ) -> Dict[Tuple[int, int],
@@ -99,4 +96,4 @@ class Planet:
         :param target: 2-Tuple
         :return: List, Direction
         """
-        pass
+        return None
