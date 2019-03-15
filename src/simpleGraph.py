@@ -12,7 +12,7 @@ class SimpleGraph:
             print("\n")
             pass
     # duplicate all edges - they are undirected
-    def doubleNodes(self):
+    def doubleAllNodes(self):
         for element in self.nodes:
-            self.doubleNodes.append(element[0], element[1], element[2])
-            self.doubleNodes.append(element[1], element[0], element[2])
+            self.doubleNodes.append(element)
+            self.doubleNodes.append([element[1], element[0], element[2]])

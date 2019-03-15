@@ -113,7 +113,7 @@ class Planet:
                 edge.append(targets[2])
                 graphList.append(edge)
         graph = SimpleGraph(graphList)
-        graph.doubleNodes()
+        graph.doubleAllNodes()
         graph.printAll()
         #result = graph.calculateWay(start, target)
         #return result
