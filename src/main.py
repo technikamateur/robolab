@@ -5,6 +5,7 @@ import uuid
 import paho.mqtt.client as mqtt
 from planet import Direction, Planet
 from communication import Communication
+import odometry as od
 
 client = None  # DO NOT EDIT
 
@@ -21,6 +22,7 @@ def run():
     # the execution of all code shall be started from within this function
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER
     print("Hello World!")
+    od.drive()
 
 
 # DO NOT EDIT
