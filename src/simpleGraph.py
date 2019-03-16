@@ -17,8 +17,6 @@ class SimpleGraph:
     def printAll(self):
         for element in self.doubleNodes:
             print(element)
-            print("\n")
-            pass
 
     # duplicate all edges - they are undirected
     def doubleAllNodes(self):
@@ -65,6 +63,7 @@ class SimpleGraph:
             for edge in availablePaths:
                 if edge[1] in usedNodes:
                     availablePaths.remove(edge)
+        shortestPath = self.shortestPathFormatter(shortestPath)
         return shortestPath
 
     def listCleaning(self, paths):
@@ -83,3 +82,22 @@ class SimpleGraph:
         for key, value in newPath.items():
             newPathList.append([key[0], key[1], value])
         return newPathList
+
+    def shortestPathFormatter(self, path):
+        # reverse list
+        path.reverse()
+        del path[-1]
+        # setting up some vthings
+        newShortestPath = []
+        nextTarget = None
+        for edge in path:
+            if nextTarget == None:
+                nextTarget = edge[0]
+                newShortestPath.append(edge)
+            elif edge[1] == nextTarget:
+                nextTarget = edge[0]
+                newShortestPath.append(edge)
+            else:
+                pass
+        newShortestPath.reverse()
+        return newShortestPath

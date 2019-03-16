@@ -115,6 +115,9 @@ class Planet:
         graph = SimpleGraph(graphList)
         graph.doubleAllNodes()
         graph.printAll()
+        print("-------------------------------")
+        print("Der kürzeste Pfad lautet:")
         print(graph.dijkstra((0,0), (1,1)))
+        print("Gesamtlänge entspricht letzter Zahl!")
         #result = graph.calculateWay(start, target)
         #return result
