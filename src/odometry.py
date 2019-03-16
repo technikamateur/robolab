@@ -39,7 +39,7 @@ def drive(bs,f):					#Main driving method
 		
 		if colorsum > 600: 			#Bob left the line
 			Sound.tone([(1661,75,75),(1661,75,75),(2217,75,50),(1661,75,50)]).wait()
-			findLine(cs, mr, ml)
+			start += findLine(cs, mr, ml)[1]
 			
 	end = time.time()
 	
@@ -67,7 +67,7 @@ def drive(bs,f):					#Main driving method
 def scanPoint(cs, mr, ml):			#returns list with point-directions
 	directionList = [[],[],[],[]]
 	for i in range (4):
-		if findLine(cs, mr, ml):
+		if findLine(cs, mr, ml)[0]:
 			directionList[i] = 1
 		else:						#turn back to the middle if no line was found
 			mr.speed_sp = 75
@@ -84,7 +84,7 @@ def scanPoint(cs, mr, ml):			#returns list with point-directions
 		time.sleep(1.85)
 		mr.stop()
 		ml.stop()
-	if not findLine(cs, mr, ml):
+	if not findLine(cs, mr, ml)[0]:
 		mr.speed_sp = 75
 		ml.speed_sp = -75
 		mr.command = "run-forever"
@@ -98,14 +98,15 @@ def findLine(cs, mr, ml):			#returns wheather a line was found
 	mr.stop()
 	ml.stop()
 	timecount = 0
+	start = time.time()
+	
 	print ("New Mesurement")
 	while timecount < 15:
 		colorsum = colorsum = cs.bin_data("hhh")[0] + cs.bin_data("hhh")[1] + cs.bin_data("hhh")[2]
 		print(colorsum)
 		if(colorsum < 270):
-			timecount = -1000
-			return True
-			#break
+			end = time.time()
+			return True, end-start
 		mr.speed_sp = 75
 		ml.speed_sp = -75
 		mr.command = "run-forever"
@@ -116,16 +117,16 @@ def findLine(cs, mr, ml):			#returns wheather a line was found
 		colorsum = colorsum = cs.bin_data("hhh")[0] + cs.bin_data("hhh")[1] + cs.bin_data("hhh")[2]
 		print(colorsum)
 		if(colorsum < 270):
-			timecount = -1000
-			return True
-			#break
+			end = time.time()
+			return True, end - start
 		mr.speed_sp = -75
 		ml.speed_sp = 75
 		mr.command = "run-forever"
 		ml.command = "run-forever"
 		timecount -= 1
 		time.sleep(0.05)
-	return False
+	end = time.time()
+	return False, end - start
 		
 def mesureColor(cs):				#returns "red" or "blue"
 	if cs.bin_data("hhh")[0] > cs.bin_data("hhh")[2] * 2.7:
@@ -136,7 +137,7 @@ def mesureColor(cs):				#returns "red" or "blue"
 		return "no color"
 		
 def calculateDistance(v, t):		#returns distance in cm
-	return v*(11/720)*math.pi*t
+	return v*(11/720)*math.pi*t + 3 #+3 to counter position
 #  Suggestion: 	implement odometry as class that is not using the ev3dev.ev3 package
 # 				establish value exchange with main driving class via getters and setters
 
