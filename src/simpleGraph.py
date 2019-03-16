@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from collections import OrderedDict
 
 
 class SimpleGraph:
@@ -30,6 +31,7 @@ class SimpleGraph:
                 self.doubleNodes.append([element[1], element[0], element[2]])
 
     def dijkstra(self, start, target):
+        # paths with same weight is still a problem...
         startNode = [None, start, 0]
         currentNode = startNode
         shortestPath = []
@@ -45,9 +47,8 @@ class SimpleGraph:
                     newWeightEdge = edge
                     newWeightEdge[2] += currentNode[2]
                     availablePaths.append(newWeightEdge)
-            ###
             # add here cleaning if same edges with diffrent weigths exist
-            ###
+            availablePaths = self.listCleaning(availablePaths)
             # find the shortest of them
             for edge in availablePaths:
                 weights.append(edge[2])
@@ -65,3 +66,20 @@ class SimpleGraph:
                 if edge[1] in usedNodes:
                     availablePaths.remove(edge)
         return shortestPath
+
+    def listCleaning(self, paths):
+        newPath = OrderedDict()
+        for edge in paths:
+            key = (edge[0], edge[1])
+            if key not in newPath:
+                newPath[key] = edge[2]
+            else:
+                value = newPath[key]
+                if edge[2] < value:
+                    newPath[key] = edge[2]
+                else:
+                    pass
+        newPathList = []
+        for key, value in newPath.items():
+            newPathList.append([key[0], key[1], value])
+        return newPathList
