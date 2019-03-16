@@ -22,7 +22,8 @@ def run():
     # the execution of all code shall be started from within this function
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER
     print("Hello World!")
-    od.drive(100,1.1)
+    od.drive(100,1.1) #100 und 1.1 funktioniert
+    #od.mesureColor()
 
 
 # DO NOT EDIT
