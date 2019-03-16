@@ -3,17 +3,17 @@ import ev3dev.ev3 as ev3
 from ev3dev.ev3 import *
 import time
 
-def drive(bs,f):
-	mr = ev3.LargeMotor("outC")
+def drive(bs,f):					#Main driving method
+	mr = ev3.LargeMotor("outC")		#Initializing sensors and motors
 	ml = ev3.LargeMotor("outB")
 	cs = ev3.ColorSensor()
 	cs.mode = "RGB-RAW"
-	while True:
-		#print(cs.bin_data("hhh"))
-		colorsum = cs.bin_data("hhh")[0] + cs.bin_data("hhh")[1] + cs.bin_data("hhh")[2]
-		print(colorsum)
-		a = (250 - colorsum)/250
-		if mesureColor(cs) is "red":
+	
+	while True:						#Feedback-Loop
+		colorsum = cs.bin_data("hhh")[0] + cs.bin_data("hhh")[1] + cs.bin_data("hhh")[2]	#Brightness
+		#print(colorsum)
+		a = (250 - colorsum)/250	#Proportional-factor
+		if mesureColor(cs) is "red":	#Colormesurement to find connection points
 			mr.stop()
 			ml.stop()
 			break
@@ -21,7 +21,7 @@ def drive(bs,f):
 			mr.stop()
 			ml.stop()
 			break
-		if colorsum <= 600:
+		if colorsum <= 600:			#Bob is near the white/black line
 			if a<0:
 				mr.speed_sp = bs+bs*a*f
 				ml.speed_sp = bs
@@ -31,8 +31,9 @@ def drive(bs,f):
 			mr.command = "run-forever"
 			ml.command = "run-forever"
 			time.sleep(0.1)
+			print (mr.speed, ml.speed)
 		
-		if colorsum > 600: #Bob left the line
+		if colorsum > 600: 			#Bob left the line
 			Sound.tone([(1661,75,75),(1661,75,75),(2217,75,50),(1661,75,50)]).wait()
 			findLine(cs, mr, ml)
 	
@@ -43,14 +44,13 @@ def drive(bs,f):
 		ml.command = "run-forever"
 		time.sleep(0.1)
 		
-	time.sleep(0.4)		#get wheels at the right position
+	time.sleep(0.4)					#get wheels to the right position
 	mr.stop()
 	ml.stop()
 	
 	print (scanPoint(cs,mr,ml))
 	
-
-def scanPoint(cs, mr, ml):
+def scanPoint(cs, mr, ml):			#returns list with point-directions
 	directionList = [[],[],[],[]]
 	for i in range (4):
 		if findLine(cs, mr, ml):
@@ -60,21 +60,27 @@ def scanPoint(cs, mr, ml):
 			ml.speed_sp = -100
 			mr.command = "run-forever"
 			ml.command = "run-forever"
-			time.sleep(0.4)
+			time.sleep(0.5)
 			mr.stop()
 			ml.stop()
-		mr.speed_sp = 150
-		ml.speed_sp = -150
+		mr.speed_sp = 100
+		ml.speed_sp = -100
 		mr.command = "run-forever"
 		ml.command = "run-forever"
-		time.sleep(1.3)
+		time.sleep(1.85)
+		mr.stop()
+		ml.stop()
+	if not findLine(cs, mr, ml):
+		mr.speed_sp = 100
+		ml.speed_sp = -100
+		mr.command = "run-forever"
+		ml.command = "run-forever"
+		time.sleep(0.5)
 		mr.stop()
 		ml.stop()
 	return directionList
 		
-		
-
-def findLine(cs, mr, ml):
+def findLine(cs, mr, ml):			#returns wheather a line was found
 	mr.stop()
 	ml.stop()
 	timecount = 0
@@ -104,10 +110,10 @@ def findLine(cs, mr, ml):
 		time.sleep(0.1)
 	return False
 		
-def mesureColor(cs):
-	if cs.bin_data("hhh")[0] > cs.bin_data("hhh")[2] * 3:
+def mesureColor(cs):				#returns "red" or "blue"
+	if cs.bin_data("hhh")[0] > cs.bin_data("hhh")[2] * 2.7:
 		return "red"
-	elif cs.bin_data("hhh")[2] > cs.bin_data("hhh")[0] * 3:
+	elif cs.bin_data("hhh")[2] > cs.bin_data("hhh")[0] * 2.7:
 		return "blue"
 	else:
 		return "no color"
