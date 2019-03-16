@@ -115,5 +115,6 @@ class Planet:
         graph = SimpleGraph(graphList)
         graph.doubleAllNodes()
         graph.printAll()
+        print(graph.dijkstra((0,0), (1,1)))
         #result = graph.calculateWay(start, target)
         #return result

@@ -64,5 +64,4 @@ class SimpleGraph:
             for edge in availablePaths:
                 if edge[1] in usedNodes:
                     availablePaths.remove(edge)
-            break
-        pass
+        return shortestPath
