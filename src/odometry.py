@@ -166,17 +166,26 @@ def mesureDistance(speedListR, speedListL, timeList):
 	v_byDeg = u_wheel / 360
 	d_axis = 12
 	degsum = 0
+	deltaX = 0
+	deltaY = 0
 	
 	for i in range(len(speedListR)):
 		vl = speedListL[i] * v_byDeg
 		vr = speedListR[i] * v_byDeg
 		if vl == vr:
 			beta = 0
+			dx = 0
+			dy = vl * timeList[i]
 		else:
-			alpha = timeList[i] * (vl-vr) / d_axis
-			beta = - alpha / 2
-		degsum -= alpha
-		print (degsum)
+			alpha = timeList[i] * (vr-vl) / d_axis
+			beta = alpha / 2
+			s = timeList[i] * (vr + vl) / alpha * math.sin(beta)
+			dx = - math.sin(degsum + beta) * s
+			dy = math.cos(degsum + beta) * s
+		deltaX += dx
+		deltaY += dy
+		degsum += alpha
+	print (deltaX, deltaY)
 	return degsum
 		
 			
