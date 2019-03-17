@@ -69,7 +69,7 @@ def drive(bs,f):					#Main driving method
 		sum += (speedListR[i]+speedListL[i])/2
 		timesum += timeList[i]
 	v = sum / len(speedListR)
-	print ("v:",v,"time:",timesum,"dist:",calculateDistance(v,timesum), "dist2:", mesureDistance(speedListR, speedListL, timeList, 0.9))
+	print ("v:",v,"time:",timesum,"dist:",calculateDistance(v,timesum), "Winkel:", mesureDistance(speedListR, speedListL, timeList))
 	
 def scanPoint(cs, mr, ml):			#returns list with point-directions
 	directionList = [[],[],[],[]]
@@ -160,32 +160,27 @@ def turn_by_degree(deg, bs):
 	end = time.time()
 	print (t, end-start)
 
-def mesureDistance(speedListR, speedListL, timeList, f):
-	d = 12
-	sum = 0
-	deg = 0
-	delx = 0
-	dely = 0
+def mesureDistance(speedListR, speedListL, timeList):
+	d_wheel = 5.6
+	u_wheel = d_wheel * math.pi
+	v_byDeg = u_wheel / 360
+	d_axis = 12
+	degsum = 0
+	
 	for i in range(len(speedListR)):
-		vr = speedListR[i] * 11/720 * math.pi
-		vl = speedListL[i] * 11/720 * math.pi
-		if vr == vl:
-			sum += f * vl * timeList[i]
+		vl = speedListL[i] * v_byDeg
+		vr = speedListR[i] * v_byDeg
+		if vl == vr:
 			beta = 0
-			dx = 0
-			dy = vl * timeList[i]
 		else:
-			rm = d * (vl/(vl-vr)+0.5)
-			sum += f * 2*rm * math.sin(timeList[i]*(vl+vr) / (4*rm))
-			beta =timeList[i]*(vl+vr) / (4*rm)
-			dx = f * math.sin(deg + beta) * 2*rm * math.sin(timeList[i]*(vl+vr) / (4*rm))
-			dy = f * math.cos(deg + beta) * 2*rm * math.sin(timeList[i]*(vl+vr) / (4*rm))
-		deg += beta
-		delx += dx
-		dely += dy
-	print (deg)
-	print (delx,dely)
-	return sum
+			alpha = timeList[i] * (vl-vr) / d_axis
+			beta = - alpha / 2
+		degsum -= alpha
+		print (degsum)
+	return degsum
+		
+			
+		
 #  Suggestion: 	implement odometry as class that is not using the ev3dev.ev3 package
 # 				establish value exchange with main driving class via getters and setters
 
