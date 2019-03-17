@@ -56,13 +56,13 @@ class Planet:
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
-                destination = {start[1]: [target[0], target[1], weight]}
+                destination = {start[1]: (target[0], target[1], weight)}
                 self.paths[start[0]].update(destination)
 
             else:
                 # add node to dict
                 destination = {}
-                destination.update({start[1]: [target[0], target[1], weight]})
+                destination.update({start[1]: (target[0], target[1], weight)})
                 self.paths.update({start[0]: destination})
         elif weight == -1:
             # if path is blocked
@@ -104,6 +104,11 @@ class Planet:
         :param target: 2-Tuple
         :return: List, Direction
         """
+        # check that start and target is part of graph
+        # problem start or target does not have to be part of self.paths.keys
+        #if not (start in self.paths and target in self.paths):
+        #    return None
+        shortestPath = []
         graphList = []
         for key, value in self.paths.items():
             for targets in value.values():
@@ -115,9 +120,16 @@ class Planet:
         graph = SimpleGraph(graphList)
         graph.doubleAllNodes()
         graph.printAll()
-        print("-------------------------------")
-        print("Der kürzeste Pfad lautet:")
-        print(graph.dijkstra((0,0), (1,1)))
-        print("Gesamtlänge entspricht letzter Zahl!")
+        # get the path and add directions
+        pathExDirection = graph.dijkstra(start, target)
+        for edge in pathExDirection:
+            valueDict = self.paths[edge[0]]
+            for values in valueDict.values():
+                if edge[1] in values:
+                    shortestPath.append((edge[0], values[1]))
+                    break
+                else:
+                    pass
+        return shortestPath
         #result = graph.calculateWay(start, target)
         #return result
