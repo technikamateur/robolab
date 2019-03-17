@@ -124,9 +124,9 @@ class Planet:
         pathExDirection = graph.dijkstra(start, target)
         for edge in pathExDirection:
             valueDict = self.paths[edge[0]]
-            for values in valueDict.values():
+            for keys, values in valueDict.items():
                 if edge[1] in values:
-                    shortestPath.append((edge[0], values[1]))
+                    shortestPath.append((edge[0], keys))
                     break
                 else:
                     pass
