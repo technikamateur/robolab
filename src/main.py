@@ -24,6 +24,7 @@ def run():
     print("Hello World!")
     od.drive(100,1.1) #100 und 1.1 funktioniert
     #od.mesureColor()
+    #od.turn_by_degree(90,100)
 
 
 # DO NOT EDIT
