@@ -151,14 +151,13 @@ class Planet:
         self.graph = SimpleGraph(graphList, start, target)
         self.logger.info("...done.")
 
-        if self.graph.pathPossible() == True:
+        if self.graph.pathPossible():
             self.logger.info("Path valid - returning shortest path now.")
             self.graph.printAll()
             # get the path and add directions
             shortestPath = []
-            pathExDirection = self.graph.dijkstra(start, target)
+            pathExDirection = self.graph.dijkstra()
             pathExDirection.reverse()
-            print(pathExDirection)
             for edge in pathExDirection:
                 valueDict = self.paths[edge[0]]
                 for keys, values in valueDict.items():
@@ -166,8 +165,8 @@ class Planet:
                         shortestPath.append((edge[0], keys))
                         break
                     else:
-                        print(edge)
                         pass
+            shortestPath.reverse()
             return shortestPath
         else:
             self.logger.warn("Path invalid - saving this")
