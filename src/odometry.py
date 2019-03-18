@@ -28,7 +28,7 @@ def drive(bs,f):					#Main driving method
 			mr.stop()
 			ml.stop()
 			break
-		if colorsum <= 600:			#Bob is near the white/black line
+		if colorsum <= 550:			#Bob is near the white/black line
 			if a<0:
 				mr.speed_sp = bs+bs*a*f
 				ml.speed_sp = bs
@@ -44,7 +44,7 @@ def drive(bs,f):					#Main driving method
 			speedListL.append(ml.speed)
 			timeList.append(end-start)
 		
-		if colorsum > 580: 			#Bob left the line
+		else: 			#Bob left the line
 			Sound.tone([(1661,75,75),(1661,75,75),(2217,75,50),(1661,75,50)]).wait()
 			start += findLine(cs, mr, ml)[1]
 			
@@ -57,11 +57,11 @@ def drive(bs,f):					#Main driving method
 		ml.command = "run-forever"
 		time.sleep(0.1)
 		
-	time.sleep(0.4)					#get wheels to the right position
+	time.sleep(0.5)					#get wheels to the right position
 	mr.stop()
 	ml.stop()
 	
-	#print (scanPoint(cs,mr,ml))
+	print (scanPoint(cs,mr,ml))
 	
 	sum = 0
 	timesum = 0
@@ -108,7 +108,7 @@ def findLine(cs, mr, ml):			#returns whether a line was found
 	while timecount < 15:
 		colorsum = colorsum = cs.bin_data("hhh")[0] + cs.bin_data("hhh")[1] + cs.bin_data("hhh")[2]
 		print("Turn left",colorsum)
-		if(colorsum < 240):
+		if(colorsum < 220):
 			end = time.time()
 			return True, end-start
 		mr.speed_sp = 75
@@ -120,7 +120,7 @@ def findLine(cs, mr, ml):			#returns whether a line was found
 	while timecount > -15:
 		colorsum = colorsum = cs.bin_data("hhh")[0] + cs.bin_data("hhh")[1] + cs.bin_data("hhh")[2]
 		print("Turn right",colorsum)
-		if(colorsum < 240):
+		if(colorsum < 220):
 			end = time.time()
 			return True, end - start
 		mr.speed_sp = -75
@@ -150,8 +150,8 @@ def turn_by_degree(deg, bs):
 	rot = (deg * 12 *2)/11 
 	t = rot/bs
 	start = time.time()
-	mr.speed_sp = bs-(bs*0.09)
-	ml.speed_sp = -(bs-(bs*0.09))
+	mr.speed_sp = bs-(bs*0.1)
+	ml.speed_sp = -(bs-(bs*0.1))
 	mr.command = "run-forever"
 	ml.command = "run-forever"
 	time.sleep(t)
