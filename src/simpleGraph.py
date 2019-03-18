@@ -3,9 +3,19 @@ from collections import OrderedDict
 
 
 class SimpleGraph:
-    def __init__(self, nodes):
+    def __init__(self, nodes, start, target):
         self.nodes = nodes
         self.doubleNodes = []
+        self.target = target
+        self.start = start
+        # double all edges, because the graph is bidirectional
+        for element in self.nodes:
+            # remove edges starting and ending on same point
+            if element[0] == element[1]:
+                pass
+            else:
+                self.doubleNodes.append(element)
+                self.doubleNodes.append([element[1], element[0], element[2]])
         """
         doubleNodes looks like:
 
@@ -18,15 +28,18 @@ class SimpleGraph:
         for element in self.doubleNodes:
             print(element)
 
-    # duplicate all edges - they are undirected
-    def doubleAllNodes(self):
-        for element in self.nodes:
-            # remove edges starting and ending on same point
-            if element[0] == element[1]:
-                pass
-            else:
-                self.doubleNodes.append(element)
-                self.doubleNodes.append([element[1], element[0], element[2]])
+    def pathPossible(self):
+        containsStart = False
+        containsTarget = False
+        for edge in self.doubleNodes:
+            if edge[0] == self.start:
+                containsStart = True
+            if edge[0] == self.target:
+                containsTarget = True
+        if containsStart and containsTarget:
+            return True
+        else:
+            return False
 
     def dijkstra(self, start, target):
         # paths with same weight is still a problem...

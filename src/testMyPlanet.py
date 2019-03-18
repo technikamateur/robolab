@@ -2,6 +2,7 @@
 from planet import Planet, Direction
 import pprint
 from collections import OrderedDict
+import time
 
 
 def pretty(d, indent=0):
@@ -12,35 +13,26 @@ def pretty(d, indent=0):
         else:
             print('\t' * (indent + 1) + str(value))
 
-def listCleaning(paths):
-    newPath = OrderedDict()
-    for edge in paths:
-        key = (edge[0], edge[1])
-        if key not in newPath:
-            newPath[key] = edge[2]
-        else:
-            value = newPath[key]
-            if edge[2] < value:
-                newPath[key] = edge[2]
-            else:
-                pass
-    newPathList = []
-    for key, value in newPath.items():
-        newPathList.append([key[0], key[1], value])
-    return newPathList
 
-
+start = time.time()
 test = Planet()
-test.add_path(((0, 0), Direction.EAST), ((1, 0), Direction.WEST), 1)
-test.add_path(((0, 0), Direction.SOUTH), ((0, 1), Direction.SOUTH), 2)
-test.add_path(((0, 1), Direction.EAST), ((1, 1), Direction.WEST), 3)
-test.add_path(((1, 0), Direction.SOUTH), ((1, 1), Direction.NORTH), 6)
-test.add_path(((0, 0), Direction.NORTH), ((0, 0), Direction.WEST), 2)
+print("Planet Galar")
+test.add_path(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 50)
+test.add_path(((0, 1), Direction.NORTH), ((1, 2), Direction.WEST), 70)
+test.add_path(((1, 2), Direction.SOUTH), ((2, 0), Direction.WEST), 120)
+test.add_path(((2, 0), Direction.NORTH), ((2, 2), Direction.SOUTH), 120)
+test.add_path(((2, 2), Direction.NORTH), ((2, 2), Direction.WEST), 100)
+test.add_path(((2, 2), Direction.EAST), ((3, 2), Direction.WEST), 50)
+test.add_path(((3, 2), Direction.EAST), ((4, 1), Direction.NORTH), 70)
+test.add_path(((3, 2), Direction.SOUTH), ((4, 1), Direction.WEST), 150)
+test.add_path(((4, 1), Direction.SOUTH), ((4, 0), Direction.NORTH), 50)
+test.add_path(((4, 1), Direction.EAST), ((4, 0), Direction.EAST), 70)
+test.add_path(((4, 0), Direction.WEST), ((2, 0), Direction.EAST), 100)
 
 pretty(test.get_paths())
 print("\n")
 print("-------------------------------")
 print("Der kürzeste Pfad lautet:")
-print("Gesamtlänge entspricht letzter Zahl!")
-print(test.shortest_path((0, 0), (1, 1)))
-#print(test.shortest_path((0, 0), (2, 2)))
+print(test.shortest_path((0, 0), (4, 1)))
+end = time.time()
+print(end - start)

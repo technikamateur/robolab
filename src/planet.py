@@ -3,6 +3,7 @@
 from enum import Enum, unique
 from typing import List, Optional, Tuple, Dict
 from simpleGraph import SimpleGraph
+import logging
 
 # IMPORTANT NOTE: DO NOT IMPORT THE ev3dev.ev3 MODULE IN THIS FILE
 
@@ -36,6 +37,11 @@ class Planet:
         self.target = None
         self.paths = {}
         self.weights = {}
+        self.graph = None
+        self.impossibleTarget = None
+        # creating logger
+        self.logger = logging.getLogger('Planet')
+        logging.basicConfig(level=logging.DEBUG)
 
 
 # ((a, b), c)
@@ -64,11 +70,14 @@ class Planet:
                 destination = {}
                 destination.update({start[1]: (target[0], target[1], weight)})
                 self.paths.update({start[0]: destination})
+        if self.impossibleTarget != None:
+            self.logger.error("There are unfound targets. Implement it now!")
         elif weight == -1:
             # if path is blocked
+            # I can not remember path is blocked or not, after scanning node again
             pass
         else:
-            print("Ooops. Die Pfadangabe war nicht korrekt!")
+            self.logger.error("Path could not be added!!")
 
     def get_paths(
             self
@@ -108,28 +117,35 @@ class Planet:
         # problem start or target does not have to be part of self.paths.keys
         #if not (start in self.paths and target in self.paths):
         #    return None
-        shortestPath = []
+        self.logger.info("Shortest path requested")
+        # create graph or regen graph
+        self.logger.info("Performing graph creation...")
         graphList = []
         for key, value in self.paths.items():
             for targets in value.values():
-                edge = []
-                edge.append(key)
-                edge.append(targets[0])
-                edge.append(targets[2])
+                edge = [key, targets[0], targets[2]]
                 graphList.append(edge)
-        graph = SimpleGraph(graphList)
-        graph.doubleAllNodes()
-        graph.printAll()
-        # get the path and add directions
-        pathExDirection = graph.dijkstra(start, target)
-        for edge in pathExDirection:
-            valueDict = self.paths[edge[0]]
-            for keys, values in valueDict.items():
-                if edge[1] in values:
-                    shortestPath.append((edge[0], keys))
-                    break
-                else:
-                    pass
-        return shortestPath
+        self.graph = SimpleGraph(graphList, start, target)
+        self.logger.info("...done.")
+
+        if self.graph.pathPossible() == True:
+            self.logger.info("Path valid - returning shortest path now.")
+            self.graph.printAll()
+            # get the path and add directions
+            shortestPath = []
+            pathExDirection = self.graph.dijkstra(start, target)
+            for edge in pathExDirection:
+                valueDict = self.paths[edge[0]]
+                for keys, values in valueDict.items():
+                    if edge[1] in values:
+                        shortestPath.append((edge[0], keys))
+                        break
+                    else:
+                        pass
+            return shortestPath
+        else:
+            self.logger.warn("Path invalid - saving this")
+            self.impossibleTarget = target
+            return None
         #result = graph.calculateWay(start, target)
         #return result
