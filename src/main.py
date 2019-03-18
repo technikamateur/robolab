@@ -5,7 +5,7 @@ import uuid
 import paho.mqtt.client as mqtt
 from planet import Direction, Planet
 from communication import Communication
-import odometry as od
+from odometry import Robot
 
 client = None  # DO NOT EDIT
 
@@ -22,9 +22,9 @@ def run():
     # the execution of all code shall be started from within this function
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER
     print("Hello World!")
-    od.drive(100,1.1) #100 und 1.1 funktioniert
-    #od.mesureColor()
-    #od.turn_by_degree(90,100)
+    bob = Robot()
+    bob.drive(100,1.1) #100 und 1.1 funktioniert
+    #bob.turn_by_degree(90,100)
 
 
 # DO NOT EDIT
