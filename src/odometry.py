@@ -30,7 +30,7 @@ class Robot:
 		while True:						#Feedback-Loop
 			start = time.time()
 			colorsum = self.cs.bin_data("hhh")[0] + self.cs.bin_data("hhh")[1] + self.cs.bin_data("hhh")[2]	#Brightness
-			#print(colorsum)
+			print(colorsum)
 			a = (250 - colorsum)/250	#Proportional-factor
 			if self.mesureColor() is "red":	#Colormesurement to find connection points
 				self.mr.stop()
@@ -75,8 +75,9 @@ class Robot:
 		
 		new_angle = self.calculateAngleAndNewPosition()[0]
 		print (self.direction_to_angle(Direction.NORTH))
-		self.view = self.transformAngle(new_angle)
+		self.view = self.angle_to_direction(new_angle)
 		print (self.view)
+		self.turn_by_direction(Direction.SOUTH)
 		
 	def calculateAngleAndNewPosition(self):
 		u_wheel = self.d_wheel * math.pi
@@ -106,10 +107,14 @@ class Robot:
 		return degsum, deltaX, deltaY
 
 	def turn_by_degree(self, deg, bs):
+		if deg < 0:
+			vz = -1
+		else:
+			vz = 1
 		rot_wheel = (deg * self.d_axis *2)/11
-		t = rot_wheel / bs
-		self.mr.speed_sp = bs-(bs*0.09)      #factor to counter inacuracy of the motor
-		self.ml.speed_sp = -(bs-(bs*0.09))
+		t = vz * rot_wheel / bs
+		self.mr.speed_sp = vz * bs-(bs*0.09)      #factor to counter inacuracy of the motor
+		self.ml.speed_sp = -vz * (bs-(bs*0.09))
 		self.mr.command = "run-forever"
 		self.ml.command = "run-forever"
 		time.sleep(t)
@@ -170,7 +175,7 @@ class Robot:
 			self.turn_by_degree(90,100)
 			self.mr.stop()
 			self.ml.stop()
-		if not self.findLine(150,40, 30):
+		if not self.findLine(150,40, 35):
 			self.mr.speed_sp = 75
 			self.ml.speed_sp = -75
 			self.mr.command = "run-forever"
@@ -187,7 +192,7 @@ class Robot:
 		self.position[1] += round(dy)
 		print (self.position)
 	
-	def transformAngle(self, angle):
+	def angle_to_direction(self, angle):
 		while angle >= 2 * math.pi:
 			angle -= 2 * math.pi
 		while angle < 0:
@@ -211,9 +216,11 @@ class Robot:
 		else:
 			return 270
 	
-	"""def turn_by_direction(self, direction, dire):
-		if direction = "N":
-			if directionList[0]"""
+	def turn_by_direction(self, direction):
+		turn_angle = self.direction_to_angle(self.view) + self.direction_to_angle(direction)
+		self.turn_by_degree(- turn_angle, 100)
+		self.findLine(150,40, 35)
+		
 		
 		
 #  Suggestion: 	implement odometry as class that is not using the ev3dev.ev3 package
