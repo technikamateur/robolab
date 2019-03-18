@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 from planet import Planet, Direction
-import pprint
-from collections import OrderedDict
 import time
 
 

@@ -29,7 +29,8 @@ Weight = int
 
 class Planet:
     """
-    Contains the representation of the map and provides certain functions to manipulate it according to the specifications
+    Contains the representation of the map and provides certain functions
+    to manipulate it according to the specifications
     """
 
     def __init__(self):
@@ -51,7 +52,8 @@ class Planet:
     def add_path(self, start: Tuple[Tuple[int, int], Direction],
                  target: Tuple[Tuple[int, int], Direction], weight: int):
         """
-         Adds a bidirectional path defined between the start and end coordinates to the map and assigns the weight to it
+         Adds a bidirectional path defined between the start and end
+         coordinates to the map and assigns the weight to it
         example:
             add_path(((0, 3), Direction.NORTH), ((0, 3), Direction.WEST), 1)
         :param start: 2-Tuple
@@ -62,25 +64,43 @@ class Planet:
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
-                destination = {start[1]: (target[0], target[1], weight)}
-                self.paths[start[0]].update(destination)
+                self.paths[start[0]].update({
+                    start[1]: (target[0], target[1], weight)
+                })
 
-            else:
+            elif start[0] not in self.paths:
                 # add node to dict
-                destination = {}
-                destination.update({start[1]: (target[0], target[1], weight)})
-                self.paths.update({start[0]: destination})
-            if self.impossibleTarget != None:
-                self.logger.error("There are unfound targets. Implement it now!")
+                self.paths.update({
+                    start[0]: {
+                        start[1]: (target[0], target[1], weight)
+                    }
+                })
+
+            if target[0] in self.paths:
+                # node in dict
+                self.paths[target[0]].update({
+                    target[1]: (start[0], start[1], weight)
+                })
+
+            elif target[0] not in self.paths:
+                # add node to dict
+                self.paths.update({
+                    target[0]: {
+                        target[1]: (start[0], start[1], weight)
+                    }
+                })
+
         elif weight == -1:
             # if path is blocked
             # I can not remember path is blocked or not, after scanning node again
-            self.logger.warn("Path is blocked")
+            self.logger.warn("Path is blocked:")
+            self.logger.warn(start)
             pass
         else:
-            self.logger.error("Path could not be added!!")
-            self.logger.error(start)
-            self.logger.error(target)
+            self.logger.error("Path could not be added!")
+
+        if self.impossibleTarget is not None:
+            self.logger.error("There are unfound targets. Implement it now!")
 
     def get_paths(
             self
