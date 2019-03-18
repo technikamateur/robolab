@@ -70,14 +70,17 @@ class Planet:
                 destination = {}
                 destination.update({start[1]: (target[0], target[1], weight)})
                 self.paths.update({start[0]: destination})
-        if self.impossibleTarget != None:
-            self.logger.error("There are unfound targets. Implement it now!")
+            if self.impossibleTarget != None:
+                self.logger.error("There are unfound targets. Implement it now!")
         elif weight == -1:
             # if path is blocked
             # I can not remember path is blocked or not, after scanning node again
+            self.logger.warn("Path is blocked")
             pass
         else:
             self.logger.error("Path could not be added!!")
+            self.logger.error(start)
+            self.logger.error(target)
 
     def get_paths(
             self
@@ -134,6 +137,8 @@ class Planet:
             # get the path and add directions
             shortestPath = []
             pathExDirection = self.graph.dijkstra(start, target)
+            pathExDirection.reverse()
+            print(pathExDirection)
             for edge in pathExDirection:
                 valueDict = self.paths[edge[0]]
                 for keys, values in valueDict.items():
@@ -141,11 +146,10 @@ class Planet:
                         shortestPath.append((edge[0], keys))
                         break
                     else:
+                        print(edge)
                         pass
             return shortestPath
         else:
             self.logger.warn("Path invalid - saving this")
             self.impossibleTarget = target
             return None
-        #result = graph.calculateWay(start, target)
-        #return result

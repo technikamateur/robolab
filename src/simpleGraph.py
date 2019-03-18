@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 from collections import OrderedDict
+import logging
 
 
 class SimpleGraph:
     def __init__(self, nodes, start, target):
+        self.logger = logging.getLogger('SimpleGraph')
+        logging.basicConfig(level=logging.DEBUG)
         self.nodes = nodes
         self.doubleNodes = []
         self.target = target
@@ -12,6 +15,8 @@ class SimpleGraph:
         for element in self.nodes:
             # remove edges starting and ending on same point
             if element[0] == element[1]:
+                self.logger.info("Detected loop:")
+                self.logger.info(element)
                 pass
             else:
                 self.doubleNodes.append(element)
@@ -37,8 +42,10 @@ class SimpleGraph:
             if edge[0] == self.target:
                 containsTarget = True
         if containsStart and containsTarget:
+            self.logger.info("Path possible")
             return True
         else:
+            self.logger.info("Path impossible")
             return False
 
     def dijkstra(self, start, target):
@@ -51,6 +58,7 @@ class SimpleGraph:
         shortestPath.append(startNode)
         usedNodes.append(startNode[1])
         while currentNode[1] != target:
+            print(currentNode)
             weights = []
             # add possible paths to availablePaths - but only unused
             for edge in self.doubleNodes:

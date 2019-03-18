@@ -16,11 +16,11 @@ def pretty(d, indent=0):
 
 start = time.time()
 test = Planet()
-print("Planet Galar")
+print("Planet Doctor Strange")
 test.add_path(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 50)
 test.add_path(((0, 1), Direction.NORTH), ((1, 2), Direction.WEST), 70)
 test.add_path(((1, 2), Direction.SOUTH), ((2, 0), Direction.WEST), 120)
-test.add_path(((2, 0), Direction.NORTH), ((2, 2), Direction.SOUTH), 120)
+test.add_path(((2, 0), Direction.NORTH), ((2, 2), Direction.SOUTH), 100)
 test.add_path(((2, 2), Direction.NORTH), ((2, 2), Direction.WEST), 100)
 test.add_path(((2, 2), Direction.EAST), ((3, 2), Direction.WEST), 50)
 test.add_path(((3, 2), Direction.EAST), ((4, 1), Direction.NORTH), 70)
