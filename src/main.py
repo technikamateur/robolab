@@ -21,7 +21,11 @@ def run():
     # the execution of all code shall be started from within this function
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER
     print("Hello World!")
-
+    
+    
+    planet = Planet()
+    com = Communication(client, planet)
+    
 
 # DO NOT EDIT
 if __name__ == '__main__':
