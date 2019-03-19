@@ -48,13 +48,25 @@ class Planet:
 # start[1]
 #d.update({key:value})
 
-    def unknownPaths(self, node):
+    def unknown_paths(self, node):
         """node should look like:
         {
             currentNode: [(Direction.NORTH, -2), (Direction.EAST, -3)]
         } Definition: -1 = blocked, -2 = pathAvailable, -3 = noPath
         """
-        self.unknownPaths.update({list(node.keys())[0]: list(node.values())[0]})
+        key = list(node.keys())[0]
+        unknown_paths = list(node.values())[0]
+        real_unknown_paths = []
+        known_paths = self.paths[key]
+        real_unknown_paths = [unknown for known in known_paths for unknown in unknown_paths if known not in unknown]
+        for direc in known_paths:
+            for unknown in unknown_paths:
+                if direc not in element:
+                    real_unknown_paths.append(unknown)
+                else:
+                    pass
+
+        #self.unknownPaths.update({list(node.keys())[0]: list(node.values())[0]})
 
     def add_path(self, start: Tuple[Tuple[int, int], Direction],
                  target: Tuple[Tuple[int, int], Direction], weight: int):
