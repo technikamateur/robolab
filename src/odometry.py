@@ -22,7 +22,7 @@ class Robot:
 		self.timeList = []
 		self.directionList = []
 
-	def drive(self, bs, f, gray = 250):						#main driving method	
+	def drive(self, bs, kp, ki = 0, kd = 0, gray = 250):						#main driving method	
 		self.cs.mode = "RGB-RAW"
 		self.speedListL = []
 		self.speedListR = []
@@ -30,12 +30,20 @@ class Robot:
 		self.directionList = []
 		self.oldview = self.view
 		self.oldposition = self.position
-	
+		integral = 0
+		lastError = 0
+		derivative = 0
+		start_control = time.time()
+		
 		while True:						#Feedback-Loop
 			start = time.time()
 			colorsum = self.mesureBrightness()
 			#print(colorsum)
-			a = (gray - colorsum)/gray	#Proportional-factor
+			error = (gray - colorsum)/gray			#Proportional-factor
+			integral += error
+			derivative = error - lastError
+			turn = kp * error + ki * integral + kd * derivative
+			#print (ki * integral)
 			if self.mesureColor() is "red":	#Colormesurement to find connection points
 				self.mr.stop()
 				self.ml.stop()
@@ -44,18 +52,25 @@ class Robot:
 				self.mr.stop()
 				self.ml.stop()
 				break
-			if colorsum <= 580:			#Bob is near the white/black line
-				if a<0:
-					self.mr.speed_sp = bs+bs*a*f
-					self.ml.speed_sp = bs
+			if colorsum <= 650:			#Bob is near the white/black line
+				if colorsum > 420:
+					bs = 100
+					kp = 1.1					#!!!!!!!!!!ACHTUNG!!!!!!!!
+					start_control = time.time()
+				if time.time()-start_control > 5:
+					bs = 170
+					kp = 0.9
+				if turn<0:
+					self.mr.speed_sp = bs+bs*turn
+					self.ml.speed_sp = bs#-bs*turn
 				else:
-					self.mr.speed_sp = bs
-					self.ml.speed_sp = bs-bs*a*f
+					self.mr.speed_sp = bs#+bs*turn
+					self.ml.speed_sp = bs-bs*turn
 				self.mr.command = "run-forever"
 				self.ml.command = "run-forever"
 				time.sleep(0.1)
 				end = time.time()
-				#print (end-start)
+				print (end-start)
 				self.speedListR.append(self.mr.speed)
 				self.speedListL.append(self.ml.speed)
 				self.timeList.append(end-start)
