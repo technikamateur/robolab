@@ -22,7 +22,7 @@ class Robot:
 		self.timeList = []
 		self.directionList = []
 
-	def drive(self, bs, f, gray = 250):				#main driving method	
+	def drive(self, bs, f, gray = 250):						#main driving method	
 		self.cs.mode = "RGB-RAW"
 		self.speedListL = []
 		self.speedListR = []
@@ -62,7 +62,7 @@ class Robot:
 			
 			else: 			#Bob left the line
 				Sound.tone([(3135.96,100,150),(3135.96,100,150),(3729.31,75,75),(3135.96,100,75)]).wait()
-				self.findLine()
+				self.findLine(230,75,30)
 			
 				
 		while self.mesureColor() is "blue" or self.mesureColor() is "red": #drive over the point
@@ -88,7 +88,7 @@ class Robot:
 		
 		print (self.createMessage())
 		
-	def calculateAngleAndNewPosition(self):
+	def calculateAngleAndNewPosition(self):					#Odometry-Function
 		u_wheel = self.d_wheel * math.pi
 		v_byDeg = u_wheel / 360
 		degsum = self.direction_to_angle(self.view) *(2 * math.pi) / 360
@@ -111,7 +111,7 @@ class Robot:
 		self.transformCoordinates(deltaX, deltaY)
 		return degsum, deltaX, deltaY
 
-	def turn_by_degree(self, deg, bs):
+	def turn_by_degree(self, deg, bs = 100):				#Turns by the given degree
 		if deg < 0:
 			vz = -1
 		else:
@@ -127,7 +127,7 @@ class Robot:
 		self.ml.stop()
 		self.checkMotorStop()
 		
-	def mesureColor(self):				#returns "red" or "blue"
+	def mesureColor(self):									#returns "red" or "blue"
 		if self.cs.bin_data("hhh")[0] > self.cs.bin_data("hhh")[2] * 2.7:
 			return "red"
 		elif self.cs.bin_data("hhh")[2] > self.cs.bin_data("hhh")[0] * 2.7:
@@ -135,7 +135,7 @@ class Robot:
 		else:
 			return "no color"
 
-	def mesureBrightness(self):
+	def mesureBrightness(self):								#returns int
 		self.cs.mode = "RGB-RAW"
 		return self.cs.bin_data("hhh")[0] + self.cs.bin_data("hhh")[1] + self.cs.bin_data("hhh")[2]
 	
@@ -174,7 +174,7 @@ class Robot:
 			time.sleep(0.05)
 		return False
 
-	def scanPoint(self, ignore = 0):				#returns list with point-directions
+	def scanPoint(self, ignore = 0):						#returns list with point-directions
 		directionList = [[],[],[],[]]
 		for i in range (4):
 			if ignore is self.view:
@@ -209,7 +209,7 @@ class Robot:
 			self.checkMotorStop()
 		return directionList
 
-	def transformCoordinates(self, dx, dy):
+	def transformCoordinates(self, dx, dy):					#rounds cm to coordinates !!!Sets 
 		dx /= 50
 		dy /= 50
 		xn = self.oldposition[0] + round(dx)
@@ -276,6 +276,11 @@ class Robot:
 		end_direction = self.angle_to_direction(self.direction_to_angle(self.view)+180, "deg")
 		return [(self.oldposition, self.oldview),(self.position, end_direction), "STATUS"]
 		
+	def setPosition(self, new_pos):
+		self.position = new_pos
+	
+	def setView(self, direction):
+		self.view = direction
 #  Suggestion: 	implement odometry as class that is not using the ev3dev.ev3 package
 # 				establish value exchange with main driving class via getters and setters
 
