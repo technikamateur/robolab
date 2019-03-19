@@ -38,6 +38,7 @@ class Planet:
         """ Initializes the data structure """
         self.paths = {}
         self.unknownPaths = {}
+        self.scannedNodes = []
         self.graph = None
         self.impossibleTarget = None
         # creating logger
@@ -55,11 +56,15 @@ class Planet:
             currentNode: [(Direction.NORTH, -2), (Direction.EAST, -3)]
         } Definition: -1 = blocked, -2 = pathAvailable, -3 = noPath
         """
+        scannedNodes.append(node)
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
         known_paths = self.paths[key]
         # remove paths which are already known
-        unknown_paths = [unknown for known in known_paths for unknown in unknown_paths if known not in unknown]
+        unknown_paths = [
+            unknown for known in known_paths for unknown in unknown_paths
+            if known not in unknown
+        ]
         """ Funktion drüber soll das machen
         for direc in known_paths:
             for unknown in unknown_paths:
@@ -71,6 +76,18 @@ class Planet:
         self.unknownPaths.update({key: unknown_paths})
         # return a random existing exit
         return random.choice(unknown_paths)[1]
+
+    def node_scanned(self, node):
+        if node in scannedNodes:
+            self.logger.info("Node already scanned.")
+            return True
+        else:
+            self.logger.info("Node unknown. Please scan!")
+            return False
+
+    def where_to_go(self, node):
+        # should return a way, where to go or maybe a complete way?
+        return None
 
     def add_path(self, start: Tuple[Tuple[int, int], Direction],
                  target: Tuple[Tuple[int, int], Direction], weight: int):
@@ -87,31 +104,27 @@ class Planet:
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
-                self.paths[start[0]].update({
-                    start[1]: (target[0], target[1], weight)
-                })
+                self.paths[start[0]].update(
+                    {start[1]: (target[0], target[1], weight)})
 
             elif start[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    start[0]: {
-                        start[1]: (target[0], target[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {start[0]: {
+                         start[1]: (target[0], target[1], weight)
+                     }})
 
             if target[0] in self.paths:
                 # node in dict
-                self.paths[target[0]].update({
-                    target[1]: (start[0], start[1], weight)
-                })
+                self.paths[target[0]].update(
+                    {target[1]: (start[0], start[1], weight)})
 
             elif target[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    target[0]: {
-                        target[1]: (start[0], start[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {target[0]: {
+                         target[1]: (start[0], start[1], weight)
+                     }})
 
         elif weight == -1:
             # if path is blocked
