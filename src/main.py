@@ -23,7 +23,11 @@ def run():
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER
     print("Hello World!")
     bob = Robot()
-    bob.drive(100,1.1) #100 und 1.1 funktioniert
+    while True:
+        direction_str = input("Input: ")
+        bob.turn_by_direction(Direction(direction_str))
+        bob.drive(100,1.1, 250) #100 und 1.1 funktioniert
+    #print(bob.mesureBrightness())
     #bob.turn_by_degree(90,100)
 
 

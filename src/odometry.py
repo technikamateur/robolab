@@ -13,25 +13,29 @@ class Robot:
 		#self.cs.mode = "RGB-RAW"
 		self.d_wheel = 5.6
 		self.d_axis = 12
-		self.position = [0,0]
+		self.oldposition = (0,0)
+		self.position = (0,0)
+		self.oldview = Direction.NORTH
 		self.view = Direction.NORTH
 		self.speedListL = []
 		self.speedListR = []
 		self.timeList = []
 		self.directionList = []
 
-	def drive(self, bs, f):				#main driving method	
+	def drive(self, bs, f, gray = 250):				#main driving method	
 		self.cs.mode = "RGB-RAW"
 		self.speedListL = []
 		self.speedListR = []
 		self.timeList = []
 		self.directionList = []
+		self.oldview = self.view
+		self.oldposition = self.position
 	
 		while True:						#Feedback-Loop
 			start = time.time()
-			colorsum = self.cs.bin_data("hhh")[0] + self.cs.bin_data("hhh")[1] + self.cs.bin_data("hhh")[2]	#Brightness
-			print(colorsum)
-			a = (250 - colorsum)/250	#Proportional-factor
+			colorsum = self.mesureBrightness()
+			#print(colorsum)
+			a = (gray - colorsum)/gray	#Proportional-factor
 			if self.mesureColor() is "red":	#Colormesurement to find connection points
 				self.mr.stop()
 				self.ml.stop()
@@ -40,7 +44,7 @@ class Robot:
 				self.mr.stop()
 				self.ml.stop()
 				break
-			if colorsum <= 550:			#Bob is near the white/black line
+			if colorsum <= 580:			#Bob is near the white/black line
 				if a<0:
 					self.mr.speed_sp = bs+bs*a*f
 					self.ml.speed_sp = bs
@@ -51,13 +55,15 @@ class Robot:
 				self.ml.command = "run-forever"
 				time.sleep(0.1)
 				end = time.time()
+				#print (end-start)
 				self.speedListR.append(self.mr.speed)
 				self.speedListL.append(self.ml.speed)
 				self.timeList.append(end-start)
 			
 			else: 			#Bob left the line
-				Sound.tone([(1661,75,75),(1661,75,75),(2217,75,50),(1661,75,50)]).wait()
-				start += self.findLine()
+				Sound.tone([(3135.96,100,150),(3135.96,100,150),(3729.31,75,75),(3135.96,100,75)]).wait()
+				self.findLine()
+			
 				
 		while self.mesureColor() is "blue" or self.mesureColor() is "red": #drive over the point
 			self.mr.speed_sp = 100
@@ -70,36 +76,35 @@ class Robot:
 		self.mr.stop()
 		self.ml.stop()
 		
-		directionList = self.scanPoint()
-		print (directionList)
+		
 		
 		new_angle = self.calculateAngleAndNewPosition()[0]
 		print (self.direction_to_angle(Direction.NORTH))
 		self.view = self.angle_to_direction(new_angle)
 		print (self.view)
-		self.turn_by_direction(Direction.SOUTH)
+		
+		directionList = self.scanPoint()
+		print (directionList)
+		
+		print (self.createMessage())
 		
 	def calculateAngleAndNewPosition(self):
 		u_wheel = self.d_wheel * math.pi
 		v_byDeg = u_wheel / 360
-		degsum = 0
+		degsum = self.direction_to_angle(self.view) *(2 * math.pi) / 360
 		deltaX = 0
 		deltaY = 0
-	
 		for i in range(len(self.speedListR)):
 			vl = self.speedListL[i] * v_byDeg
 			vr = self.speedListR[i] * v_byDeg
-			if vl == vr:
-				beta = 0
-				alpha = 0
-				dx = 0
-				dy = vl * self.timeList[i]
+			alpha = self.timeList[i] * (vr-vl) / self.d_axis
+			beta = alpha / 2
+			if alpha == 0:
+				s = vl * self.timeList[i]
 			else:
-				alpha = self.timeList[i] * (vr-vl) / self.d_axis
-				beta = alpha / 2
 				s = self.timeList[i] * (vr + vl) / alpha * math.sin(beta)
-				dx = - math.sin(degsum + beta) * s
-				dy = math.cos(degsum + beta) * s
+			dx = - math.sin(degsum + beta) * s
+			dy = math.cos(degsum + beta) * s
 			deltaX += dx
 			deltaY += dy
 			degsum += alpha
@@ -119,7 +124,8 @@ class Robot:
 		self.ml.command = "run-forever"
 		time.sleep(t)
 		self.mr.stop()
-		self.ml.stop()           
+		self.ml.stop()
+		self.checkMotorStop()
 		
 	def mesureColor(self):				#returns "red" or "blue"
 		if self.cs.bin_data("hhh")[0] > self.cs.bin_data("hhh")[2] * 2.7:
@@ -129,15 +135,22 @@ class Robot:
 		else:
 			return "no color"
 
-	def findLine(self, b = 250, bs = 75, timestamp = 15):	#returns whether a line was found
+	def mesureBrightness(self):
+		self.cs.mode = "RGB-RAW"
+		return self.cs.bin_data("hhh")[0] + self.cs.bin_data("hhh")[1] + self.cs.bin_data("hhh")[2]
+	
+	def findLine(self, b = 230, bs = 75, timestamp = 15):	#returns whether a line was found
 		self.mr.stop()
 		self.ml.stop()
 		timecount = 0
 	
 		while timecount < timestamp:
-			colorsum = colorsum = self.cs.bin_data("hhh")[0] + self.cs.bin_data("hhh")[1] + self.cs.bin_data("hhh")[2]
+			colorsum = self.mesureBrightness()
 			#print("Turn left",colorsum)
 			if(colorsum < b):
+				self.mr.stop()
+				self.ml.stop()
+				self.checkMotorStop()
 				return True
 			self.mr.speed_sp = bs
 			self.ml.speed_sp = -bs
@@ -149,6 +162,9 @@ class Robot:
 			colorsum =self.cs.bin_data("hhh")[0] + self.cs.bin_data("hhh")[1] + self.cs.bin_data("hhh")[2]
 			#print("Turn right",colorsum)
 			if(colorsum < b):
+				self.mr.stop()
+				self.ml.stop()
+				self.checkMotorStop()
 				return True
 			self.mr.speed_sp = -bs
 			self.ml.speed_sp = bs
@@ -158,13 +174,18 @@ class Robot:
 			time.sleep(0.05)
 		return False
 
-	def scanPoint(self):				#returns list with point-directions
+	def scanPoint(self, ignore = 0):				#returns list with point-directions
 		directionList = [[],[],[],[]]
 		for i in range (4):
+			if ignore is self.view:
+				stat = -1
+			else:
+				stat = -2
 			if self.findLine():
-				directionList[i] = True
+				directionList[i] = self.view, stat
+				self.view = self.angle_to_direction(self.direction_to_angle(self.view) + 90, "deg")
 			else:						#turn back to the middle if no line was found
-				directionList[i] = False
+				directionList[i] = self.view , -3
 				self.mr.speed_sp = 75
 				self.ml.speed_sp = -75
 				self.mr.command = "run-forever"
@@ -172,10 +193,12 @@ class Robot:
 				time.sleep(0.8)
 				self.mr.stop()
 				self.ml.stop()
-			self.turn_by_degree(90,100)
+				self.view = self.angle_to_direction(self.direction_to_angle(self.view) + 90, "deg")
+			self.turn_by_degree(90,150)
 			self.mr.stop()
 			self.ml.stop()
-		if not self.findLine(150,40, 35):
+			self.checkMotorStop()
+		if not self.findLine():
 			self.mr.speed_sp = 75
 			self.ml.speed_sp = -75
 			self.mr.command = "run-forever"
@@ -183,28 +206,44 @@ class Robot:
 			time.sleep(0.8)
 			self.mr.stop()
 			self.ml.stop()
+			self.checkMotorStop()
 		return directionList
 
 	def transformCoordinates(self, dx, dy):
 		dx /= 50
 		dy /= 50
-		self.position[0] += round(dx)
-		self.position[1] += round(dy)
+		xn = self.oldposition[0] + round(dx)
+		yn = self.oldposition[1] + round(dy)
+		self.position = (xn,yn)
 		print (self.position)
 	
-	def angle_to_direction(self, angle):
-		while angle >= 2 * math.pi:
-			angle -= 2 * math.pi
-		while angle < 0:
-			angle += 2 * math.pi
-		if angle <= math.pi * 1/4 or angle > math.pi * 7/4:
-			return Direction.NORTH
-		elif angle <= math.pi * 3/4 and angle > math.pi * 1/4:
-			return Direction.WEST
-		elif angle <= math.pi * 5/4 and angle > math.pi * 3/4:
-			return Direction.SOUTH
+	def angle_to_direction(self, angle, deg = "rad"):
+		if deg is "rad":
+			while angle >= 2 * math.pi:
+				angle -= 2 * math.pi
+			while angle < 0:
+				angle += 2 * math.pi
+			if angle <= math.pi * 1/4 or angle > math.pi * 7/4:
+				return Direction.NORTH
+			elif angle <= math.pi * 3/4 and angle > math.pi * 1/4:
+				return Direction.WEST
+			elif angle <= math.pi * 5/4 and angle > math.pi * 3/4:
+				return Direction.SOUTH
+			else:
+				return Direction.EAST
 		else:
-			return Direction.EAST
+			while angle >= 360:
+				angle -= 360
+			while angle < 0:
+				angle += 360
+			if angle <= 180 * 1/4 or angle > 180 * 7/4:
+				return Direction.NORTH
+			elif angle <= 180 * 3/4 and angle > 180 * 1/4:
+				return Direction.WEST
+			elif angle <= 180 * 5/4 and angle > 180 * 3/4:
+				return Direction.SOUTH
+			else:
+				return Direction.EAST
 	
 	def direction_to_angle(self, direction):
 		if direction is Direction.NORTH:
@@ -217,11 +256,25 @@ class Robot:
 			return 270
 	
 	def turn_by_direction(self, direction):
-		turn_angle = self.direction_to_angle(self.view) + self.direction_to_angle(direction)
-		self.turn_by_degree(- turn_angle, 100)
+		turn_angle = self.direction_to_angle(direction) - self.direction_to_angle(self.view)
+		if turn_angle > 180:
+			turn_angle -= 180
+			turn_angle *= -1
+		elif turn_angle < -180:
+			turn_angle += 180
+			turn_angle *= -1
+		self.turn_by_degree(turn_angle, 150)
+		self.view = direction
 		self.findLine(150,40, 35)
 		
+	def checkMotorStop(self):
+		while self.ml.speed != 0 or self.mr.speed != 0:
+			self.mr.stop()
+			self.ml.stop()
 		
+	def createMessage(self):
+		end_direction = self.angle_to_direction(self.direction_to_angle(self.view)+180, "deg")
+		return [(self.oldposition, self.oldview),(self.position, end_direction), "STATUS"]
 		
 #  Suggestion: 	implement odometry as class that is not using the ev3dev.ev3 package
 # 				establish value exchange with main driving class via getters and setters
