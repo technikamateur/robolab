@@ -59,20 +59,23 @@ class Planet:
         scannedNodes.append(node)
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
-        known_paths = self.paths[key]
-        # remove paths which are already known
-        unknown_paths = [
-            unknown for known in known_paths for unknown in unknown_paths
-            if known not in unknown
-        ]
-        """ Funktion drüber soll das machen
-        for direc in known_paths:
-            for unknown in unknown_paths:
-                if direc not in element:
-                    real_unknown_paths.append(unknown)
-                else:
-                    pass
-        """
+        if self.paths != None:
+            # remove already known exits or node
+            known_paths = self.paths[key]
+            # remove paths which are already known
+            unknown_paths = [
+                unknown for known in known_paths for unknown in unknown_paths
+                if known not in unknown
+            ]
+            """ Funktion drüber soll das machen
+            for direc in known_paths:
+                for unknown in unknown_paths:
+                    if direc not in element:
+                        real_unknown_paths.append(unknown)
+                    else:
+                        pass
+            """
+        unknown_paths = [x for x in unknown_paths if -1 not in x]
         self.unknownPaths.update({key: unknown_paths})
         # return a random existing exit
         return random.choice(unknown_paths)[1]
