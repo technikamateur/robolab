@@ -39,7 +39,7 @@ class Communication:
         # Start listening to incoming messages
         self.client.loop_start()
 
-        self.timer()
+        #self.timer()
 
 
 
@@ -47,24 +47,6 @@ class Communication:
         self.data = None
         self.topic = "explorer/118"
         self.planet_Chan = None
-
-        self.startX = None
-        self.startY = None
-
-        self.startDir = None
-        self.endDir = None
-
-        self.pathStat = None
-        self.pathWeight  = None  #int
-
-        self.geschaePx = None
-        self.geschaePy = None
-
-        self.korrPx = None
-        self.korrPy = None
-
-        self.targetX = None
-        self.targetY = None
 
 
 
@@ -91,10 +73,10 @@ class Communication:
         print(json.dumps(data, indent=2))
         print('\n')
 
-        self.data = json.dumps(data, indent=2)
+        self.data = data
 
         self.typ_Entsch()
-
+        #self.timer()
 
     #Timer: jede 2 Sekunden warten:
     def timer(self):
@@ -105,35 +87,28 @@ class Communication:
 
 
     def typ_Entsch(self): #Test
-        #print("schon in typ_Entsch")
-        if '"from": "client","type": "planet"' in self.data:
-            print("ja ja ja")
+        #print("schon in typ_Epntsch")
+        if self.data["from"] == "server" and self.data["type"] == "planet":
+            payload = self.data["payload"]
+            planetName = payload["planetName"]
+            self.planet_Chan = 'planet/'+planetName+'-118'
             self.pruefDaten()
-
-
-
-
 
     def send_ready(self):
         erk = '{"from": "client", "type": "ready"}'
         self.client.publish("explorer/118", erk, qos=1)
 
-
     def send_test(self):
-        mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Stan"}}'
+        mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Hawkeye"}}'
         self.client.publish("explorer/118", mess, qos=1)
-
 
     def pruefDaten(self):
         self.pathStat = "free"
-        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(0)+', "startY": '+str(0)+', "startDirection": "N", "endX": '+str(2)+', "endY": '+str(3)+', "endDirection": "W", "pathStatus": '+str(self.pathStat)+'}}'
-
         print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(13)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(14)+', "endY": '+str(36)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        print(pruef)
         self.client.subscribe(self.planet_Chan, qos=1)
         self.client.publish(self.planet_Chan, pruef, qos=1)
-
-
-
 
 
 client = mqtt.Client(client_id=str(uuid.uuid4()),  # client_id has to be unique among ALL users
@@ -143,6 +118,11 @@ client = mqtt.Client(client_id=str(uuid.uuid4()),  # client_id has to be unique 
 com = Communication(client)
 com.send_ready()
 com.timer()
+#com.send_test()
+#com.timer()
+com.pruefDaten()
+com.timer()
+
 
 '''
 t0 = time.time()

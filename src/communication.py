@@ -4,6 +4,7 @@
 import json
 import paho.mqtt.client as mqtt
 import time
+from planet import Direction
 
 
 
@@ -32,28 +33,12 @@ class Communication:
         self.client.loop_start()
 
 
-        #Parameter:
+
+         #Parameter:
         self.data = None
         self.topic = "explorer/118"
         self.planet_Chan = None
 
-        self.startX = None
-        self.startY = None
-
-        self.startDir = None
-        self.endDir = None
-
-        self.pathStat = None
-        self.pathWeight = None     #int
-
-        self.geschaePx = None
-        self.geschaePy = None
-
-        self.korrPx = None
-        self.korrPy = None
-
-        self.targetX = None
-        self.targetY = None
 
 
     # this is a helper method that catches errors and prints them
@@ -79,7 +64,7 @@ class Communication:
         print(json.dumps(data, indent=2))
         print("\n")
 
-        self.data = json.dumps(data, indent=2)
+        self.data = data
 
         self.timer()
         self.typ_Entsch()
@@ -89,32 +74,28 @@ class Communication:
     #Timer: jede 2 Sekunden warten:
     def timer(self):
         t0 = time.time()
-        alt_message = self.data
         while (time.time()-t0) < 2:
-            if alt_message == self.data:   #Prüf neue Message. Warte auf neue Message.
-                print("warte auf neue Message.")
+            pass
         print("neue Message kommt!")
-        self.typ_Entsch()
 
 
 
 
     def typ_Entsch(self):
-        if "planetName" in self.data:
+        if self.data["from"] == "server" and self.data["type"] == "planet":
+            payload = self.data["payload"]
+            planetName = payload["planetName"]
+            self.planet_Chan = 'planet/'+planetName+'-118'
             self.setPlanetInfo()
-        elif '{"from": "server", "type": "path"}' in self.data:
+        elif self.data["from"] == "server" and self.data["type"] == "path":
             self.set_korrePos()
-        elif '{"from": "server", "type": "pathUnveiled"}' in self.data:
-            self.set_korrePos()
-        elif '{"from": "client", "type": "pathSelect"}' in self.data:
-            self.pathSelect()
-        elif '{"from": "server", "type": "pathSelect"}' in self.data:
+        elif self.data["from"] == "server" and self.data["type"] == "pathUnveiled":
+            self.set_anderePos()
+        elif self.data["from"] == "server" and self.data["type"] == "pathSelect":
             self.serverPath()
-        elif '{"from": "server", "type": "target"}' in self.data:
+        elif self.data["from"] == "server" and self.data["type"] == "target":
             self.target_server()
-        elif '{"from": "client", "type": "targetReached"}' in self.data:
-            self.target_Reached()
-        elif '{"from": "server", "type": "done"}' in self.data:
+        elif self.data["from"] == "server" and self.data["type"] == "done":
             self.done()
 
 
@@ -129,73 +110,104 @@ class Communication:
 
     # 2.PlanetName und StartKoordinanten übergeben
     def setPlanetInfo(self):
-        if "planetName" in self.data:
-            playload = self.data("playload")
-            planetName = playload("planetName")
-            self.planet_Chan = 'planet/'+str(planetName)+''+str(-118)+'
-            self.startX = int(self.data("startX"))
-            self.startY = int(self.data("startY"))
-            self.planet.setPlanetInfo(self.data("planetName"), self.startX, self.startY)
+        playload = self.data["playload"]
+        planetName = playload["planetName"]
+        self.planet_Chan = 'planet/'+planetName+''+str(-118)+'
+        self.client.subscribe(self.planet_Chan, qos=1)
+        startX = int(self.data["startX"])
+        startY = int(self.data["startY"])
+
+        return (startX, startY)
 
 
     # 3. gefahrenden Pfad und geschätzte Posision zu MS schicken
-    def pruefDaten(self):
-        self.pathStat = "free"
-        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(self.startX)+', "startY": '+str(self.startY)+', "startDirection": '+self.startDir+', "endX": '+str(self.geschaePx)+', "endY": '+str(self.geschaePy)+', "endDirection": '+self.endDir+', "pathStatus": '+self.pathStat+'}}'
+    def pruefDaten(self, message):
+        startX = message[0][0][0]
+        startY = message[0][0][1]
+        startDir = message[0][1]
+        endX = message[1][0][0]
+        endY = message[1][0][1]
+        endDir = message[1][1]
+        status = message[2]
+
+        pp = '{"from":"client", "type":"path", "payload": {"startX": "'+str(startX)+'", "startY": "'+str(startY)+'", "startDirection": "'+startDir+'", "endX": "'+str(endX)+'", "endY": "'+str(endY)+'", "endDirection": "'+endDir+'", "pathStatus": "'+status+'"}}'
 
         self.client.subscribe(self.planet_Chan, qos=1)
-        self.client.publish(self.planet_Chan, pruef, qos=1)   #planet/<CHANNEL>,<CHANNEL> = Planet name - 118
+        self.client.publish(self.planet_Chan, pp, qos=1)   #planet/<CHANNEL>,<CHANNEL> = Planet name - 118
 
 
     # 4. Korregierte Position zu Planet schicken & Pfadaufdeckung und Pfadwahl:
     def set_korrePos(self):
-        korre_pos = self.data("payload")
-        self.startX = int(korre_pos("startX"))
-        self.startY = int(korre_pos("startY"))
-        self.startDir = korre_pos("startDirection")
-        self.korrPx = int(korre_pos("endX"))
-        self.korrPy = int(korre_pos("endY"))
-        self.endDir = korre_pos("endDirection")
-        self.pathStat = korre_pos("pathStatus")
-        self.pathWeight = int(korre_pos("pathWeight"))
+        korre_pos = self.data["payload"]
+        startX = int(korre_pos["startX"])
+        startY = int(korre_pos["startY"])
+        startDir = korre_pos["startDirection"]
+        endX = int(korre_pos["endX"])
+        endY = int(korre_pos["endY"])
+        endDir = korre_pos["endDirection"]
+        status = korre_pos["pathStatus"]
+        weight = int(korre_pos["pathWeight"])
 
-        self.planet.add_path(((self.aktPx, self.aktPy), self.startDir), ((self.korrPx, self.korrPy, self.endDir)), self.pathWeight)
+        self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
+
+        return [(endX, endY), endDir]
+
+    # Pfad und Position von anderen Robert gefunden haben, direkt hinzufügen:
+    def set_anderePos(self):
+        add = self.data["payload"]
+        startX = int(add["startX"])
+        startY = int(add["startY"])
+        startDir = add["startDirection"]
+        endX = int(add["endX"])
+        endY = int(add["endY"])
+        endDir = add["endDirection"]
+        status = add["pathStatus"]
+        weight = int(add["pathWeight"])
+
+        self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
 
 
 
     # 5. pathSelect Publish on planet:
-    def pathSelect(self):
-        path = self.data("playload")
-        self.startX = int(path("startX"))
-        self.startY = int(path("startY"))
-        self.startDir = path("startDirection")
-        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(self.startX)+', "startY": '+str(self.startY)+', "startDirection": '+self.startDir+'}}'
+    def pathSelect(self, node):
+        result = self.planet.unknown_paths(node)
+        startX = result[0][0]
+        startY = result[0][1]
+        startDir = result[1].value
+
+        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": "'+str(startX)+'", "startY": "'+str(startY)+'", "startDirection": "'+str(startDir)+'"} }'
 
         self.client.publish(self.planet_Chan, select, qos=1)
 
 
+
     # 6. pathSelect from Server:
     def serverPath(self):
-        path_server = self.data("playload")
-        self.startDir = path_server("startDirection")
+        path_server = self.data["playload"]
+        startDir = path_server["startDirection"]
+
+        return Direction(starDir)
+
 
 
     # 7. Zielpossition aus Mutterschiff:
     def target_server(self):
-        target = self.data("playload")
-        self.targetX = int(target("targetX"))
-        self.targetY = int(target("targetY"))
+        target = self.data["playload"]
+        targetX = int(target["targetX"])
+        targetY = int(target["targetY"])
+
+        return (targetX, targetY)
 
 
     # 8. Abschluss der Erkundung:
     def target_Reached(self):
-        targetR = '{"from":"client", "type":"targetReached", "payload": {"message": "target is reached!"}}'
+        targetR = '{"from":"client", "type":"targetReached", "payload": {"message": "target is reached!"} }'
         self.client.publish(self.topic, targetR, qos=1)
 
 
     # 9. ExplorationCompleted:
     def explor_compl(self):
-        completed = '{"from":"client", "type":"explorationCompleted", "payload": {"message": "Exploration is completed!"}}'
+        completed = '{"from":"client", "type":"explorationCompleted", "payload": {"message": "Exploration is completed!"} }'
         self.client.publish(self.topic, completed, qos=1)
 
 
