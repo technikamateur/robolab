@@ -35,9 +35,8 @@ class Planet:
 
     def __init__(self):
         """ Initializes the data structure """
-        self.target = None
         self.paths = {}
-        self.weights = {}
+        self.unknownPaths = {}
         self.graph = None
         self.impossibleTarget = None
         # creating logger
@@ -48,6 +47,14 @@ class Planet:
 # ((a, b), c)
 # start[1]
 #d.update({key:value})
+
+    def unknownPaths(self, node):
+        """node should look like:
+        {
+            currentNode: [(Direction.NORTH, -2), (Direction.EAST, -3)]
+        } Definition: -1 = blocked, -2 = pathAvailable, -3 = noPath
+        """
+        self.unknownPaths.update({list(node.keys())[0]: list(node.values())[0]})
 
     def add_path(self, start: Tuple[Tuple[int, int], Direction],
                  target: Tuple[Tuple[int, int], Direction], weight: int):
