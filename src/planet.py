@@ -4,6 +4,7 @@ from enum import Enum, unique
 from typing import List, Optional, Tuple, Dict
 from simpleGraph import SimpleGraph
 import logging
+import random
 
 # IMPORTANT NOTE: DO NOT IMPORT THE ev3dev.ev3 MODULE IN THIS FILE
 
@@ -56,17 +57,20 @@ class Planet:
         """
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
-        real_unknown_paths = []
         known_paths = self.paths[key]
-        real_unknown_paths = [unknown for known in known_paths for unknown in unknown_paths if known not in unknown]
+        # remove paths which are already known
+        unknown_paths = [unknown for known in known_paths for unknown in unknown_paths if known not in unknown]
+        """ Funktion drüber soll das machen
         for direc in known_paths:
             for unknown in unknown_paths:
                 if direc not in element:
                     real_unknown_paths.append(unknown)
                 else:
                     pass
-
-        #self.unknownPaths.update({list(node.keys())[0]: list(node.values())[0]})
+        """
+        self.unknownPaths.update({key: unknown_paths})
+        # return a random existing exit
+        return random.choice(unknown_paths)[1]
 
     def add_path(self, start: Tuple[Tuple[int, int], Direction],
                  target: Tuple[Tuple[int, int], Direction], weight: int):
@@ -112,14 +116,15 @@ class Planet:
         elif weight == -1:
             # if path is blocked
             # I can not remember path is blocked or not, after scanning node again
-            self.logger.warn("Path is blocked:")
-            self.logger.warn(start)
+            self.logger.warning("Path is blocked:")
+            self.logger.warning(start)
             pass
         else:
             self.logger.error("Path could not be added!")
 
         if self.impossibleTarget is not None:
             self.logger.error("There are unfound targets. Implement it now!")
+        # Now unknown paths should be cleaned
 
     def get_paths(
             self
@@ -188,6 +193,6 @@ class Planet:
             shortestPath.reverse()
             return shortestPath
         else:
-            self.logger.warn("Path invalid - saving this")
+            self.logger.warning("Path invalid - saving this")
             self.impossibleTarget = target
             return None
