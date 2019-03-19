@@ -13,6 +13,7 @@ import json
 import paho.mqtt.client as mqtt
 import uuid
 import time
+from planet import Planet, Direction
 
 
 
@@ -40,6 +41,7 @@ class Communication:
         self.client.loop_start()
 
         #self.timer()
+        self.planet = Planet()
 
 
 
@@ -111,6 +113,19 @@ class Communication:
         self.client.publish(self.planet_Chan, pruef, qos=1)
 
 
+    def pathSelect(self, node):
+        result = self.planet.unknown_paths(node)
+        print(result)
+        startX = result[0][0]
+        startY = result[0][1]
+        startDir = result[1].value
+
+        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": "'+str(startX)+'", "startY": "'+str(startY)+'", "startDirection": "'+str(startDir)+'"} }'
+
+        self.client.publish(self.planet_Chan, select, qos=1)
+
+
+
 client = mqtt.Client(client_id=str(uuid.uuid4()),  # client_id has to be unique among ALL users
                          clean_session=False,
                          protocol=mqtt.MQTTv31)
@@ -122,6 +137,9 @@ com.timer()
 #com.timer()
 com.pruefDaten()
 com.timer()
+node = {(0,1): [(Direction.NORTH, -2), (Direction.WEST, -2)]}
+com.pathSelect(node)
+
 
 
 '''

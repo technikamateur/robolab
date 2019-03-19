@@ -56,10 +56,10 @@ class Planet:
             currentNode: [(Direction.NORTH, -2), (Direction.EAST, -3)]
         } Definition: -1 = blocked, -2 = pathAvailable, -3 = noPath
         """
-        scannedNodes.append(node)
+        self.scannedNodes.append(node)
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
-        if self.paths != None:
+        if self.paths:
             # remove already known exits or node
             known_paths = self.paths[key]
             # remove paths which are already known
@@ -78,7 +78,7 @@ class Planet:
         unknown_paths = [x for x in unknown_paths if -1 not in x]
         self.unknownPaths.update({key: unknown_paths})
         # return a random existing exit
-        return random.choice(unknown_paths)[1]
+        return [key, random.choice(unknown_paths)[0]]
 
     def node_scanned(self, node):
         if node in scannedNodes:
