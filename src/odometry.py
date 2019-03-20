@@ -10,6 +10,7 @@ class Robot:
 		self.mr = ev3.LargeMotor("outC")	#Initializing sensors and motors
 		self.ml = ev3.LargeMotor("outB")
 		self.cs = ev3.ColorSensor()
+		self.ts = ev3.TouchSensor()
 		#self.cs.mode = "RGB-RAW"
 		self.d_wheel = 5.6
 		self.d_axis = 12
@@ -17,6 +18,7 @@ class Robot:
 		self.position = (0,0)
 		self.oldview = Direction.NORTH
 		self.view = Direction.NORTH
+		self.status = "free"
 		self.speedListL = []
 		self.speedListR = []
 		self.timeList = []
@@ -30,6 +32,7 @@ class Robot:
 		self.directionList = []
 		self.oldview = self.view
 		self.oldposition = self.position
+		self.status = "free"
 		integral = 0
 		lastError = 0
 		derivative = 0
@@ -52,14 +55,26 @@ class Robot:
 				self.mr.stop()
 				self.ml.stop()
 				break
+			if self.ts.value() == 1:			#Touchsensor is pressed
+				self.mr.speed_sp = - 100
+				self.ml.speed_sp = - 100
+				self.mr.command = "run-forever"
+				self.ml.command = "run-forever"
+				time.sleep(1.1)
+				self.status = "blocked"
+				self.turn_by_degree(180,100)
+				self.findLine(150,40, 35)
+				bs = 100
+				kp = 1.0
+				start_control = time.time()
 			if colorsum <= 650:			#Bob is near the white/black line
-				if colorsum > 420:
+				if colorsum > 420 or colorsum < 120:
 					bs = 100
-					kp = 1.1					#!!!!!!!!!!ACHTUNG!!!!!!!!
+					kp = 1.0					#!!!!!!!!!!WARNING!!!!!!!!
 					start_control = time.time()
-				if time.time()-start_control > 5:
+				if time.time()-start_control > 4:
 					bs = 170
-					kp = 0.9
+					kp = 0.8
 				if turn<0:
 					self.mr.speed_sp = bs+bs*turn
 					self.ml.speed_sp = bs#-bs*turn
@@ -94,14 +109,15 @@ class Robot:
 		
 		
 		new_angle = self.calculateAngleAndNewPosition()[0]
-		print (self.direction_to_angle(Direction.NORTH))
 		self.view = self.angle_to_direction(new_angle)
+		print (self.view)
+		print (self.createMessage())
 		print (self.view)
 		
 		directionList = self.scanPoint()
 		print (directionList)
 		
-		print (self.createMessage())
+		
 		
 	def calculateAngleAndNewPosition(self):					#Odometry-Function
 		u_wheel = self.d_wheel * math.pi
@@ -145,7 +161,7 @@ class Robot:
 	def mesureColor(self):									#returns "red" or "blue"
 		if self.cs.bin_data("hhh")[0] > self.cs.bin_data("hhh")[2] * 2.7:
 			return "red"
-		elif self.cs.bin_data("hhh")[2] > self.cs.bin_data("hhh")[0] * 2.7:
+		elif self.cs.bin_data("hhh")[2] > self.cs.bin_data("hhh")[0] * 2.5:
 			return "blue"
 		else:
 			return "no color"
@@ -224,7 +240,7 @@ class Robot:
 			self.checkMotorStop()
 		return directionList
 
-	def transformCoordinates(self, dx, dy):					#rounds cm to coordinates !!!Sets 
+	def transformCoordinates(self, dx, dy):					#rounds cm to coordinates !!!Sets position
 		dx /= 50
 		dy /= 50
 		xn = self.oldposition[0] + round(dx)
@@ -270,7 +286,7 @@ class Robot:
 		else:
 			return 270
 	
-	def turn_by_direction(self, direction):
+	def turn_by_direction(self, direction):					#changes view !!!
 		turn_angle = self.direction_to_angle(direction) - self.direction_to_angle(self.view)
 		if turn_angle > 180:
 			turn_angle -= 180
@@ -287,9 +303,14 @@ class Robot:
 			self.mr.stop()
 			self.ml.stop()
 		
-	def createMessage(self):
+	def createMessage(self):								#sets view, if status is "blocked"
 		end_direction = self.angle_to_direction(self.direction_to_angle(self.view)+180, "deg")
-		return [(self.oldposition, self.oldview),(self.position, end_direction), "STATUS"]
+		if self.status is "free":
+			return [(self.oldposition, self.oldview),(self.position, end_direction), self.status]
+		else:
+			self.position = self.oldposition
+			self.view = self.angle_to_direction(self.direction_to_angle(self.oldview)+180, "deg")
+			return [(self.oldposition, self.oldview),(self.oldposition, self.oldview), self.status]
 		
 	def setPosition(self, new_pos):
 		self.position = new_pos
