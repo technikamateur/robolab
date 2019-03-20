@@ -189,6 +189,8 @@ class Communication:
 
         self.client.publish(self.planet_Chan, select, qos=1)
 
+        return self.direc
+
 
 
     # 6. pathSelect from Server:
