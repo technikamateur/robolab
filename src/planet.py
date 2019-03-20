@@ -3,6 +3,7 @@
 from enum import Enum, unique
 from typing import List, Optional, Tuple, Dict
 from simpleGraph import SimpleGraph
+from searchable_graph import SearchableGraph
 import logging
 import random
 
@@ -50,7 +51,7 @@ class Planet:
 # start[1]
 #d.update({key:value})
 
-    adds unknown paths
+    # adds unknown paths
     def add_unknown_paths(self, node):
         """node should look like:
         {
@@ -86,11 +87,29 @@ class Planet:
 
     # direction with unknown path for node
     def get_direction(self, node):
-        pass
+        value = self.unknownPaths[node]
+        return random.choice(value)[1]
 
     # returns path to next node from node
     def get_next_node(self, node):
-        pass
+        # maybe there are no paths to discover
+        if self.unknownPaths:
+            return None
+        self.logger.info("Performing graph creation...")
+        graphList = {}
+        for key, value in self.paths.items():
+            for targets in value.values():
+                if key in graphList:
+                    # node in dict
+                    graphList[key].append(targets[0])
+
+                elif key not in graphList:
+                    # add node to dict
+                    graphList.update(key: targets[0])
+        graph = SearchableGraph(graphList, node, self.unknownPaths.keys())
+        target = graph.find_next_node()
+        self.logger.info("Found new target node.")
+        return self.shortest_path(node, target)
 
     # check whether node is already scanned
     def node_scanned(self, node):
@@ -101,7 +120,7 @@ class Planet:
             self.logger.info("Node unknown. Please scan!")
             return False
 
-    # check whether there ar unknown directions for node
+    # check whether there are unknown directions for node
     def go_direction(self, node):
         if node in self.unknownPaths:
             return True
@@ -232,7 +251,7 @@ class Planet:
 
         if self.graph.pathPossible():
             self.logger.info("Path valid - returning shortest path now.")
-            self.graph.printAll()
+            #self.graph.printAll()
             # get the path and add directions
             shortestPath = []
             pathExDirection = self.graph.dijkstra()
