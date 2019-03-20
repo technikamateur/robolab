@@ -61,6 +61,9 @@ class SimpleGraph:
                     newWeightEdge = edge
                     newWeightEdge[2] += currentNode[2]
                     availablePaths.append(newWeightEdge)
+            # if there are no availablePaths target is not reachable
+            if not availablePaths:
+                return None
             # add here cleaning if same edges with diffrent weigths exist
             availablePaths = listCleaning(availablePaths)
             # find the shortest of them
