@@ -106,6 +106,11 @@ class Communication:
             self.aktY = payload["startY"]
             print(self.aktX, self.aktY)
 
+        elif von == "server" and nach == "pathSelect":
+            self.serverPath()
+        elif von == "server" and nach == "path":
+            self.set_korrePos()
+
 
 
 
@@ -114,20 +119,61 @@ class Communication:
         self.client.publish("explorer/118", erk, qos=1)
 
     def send_test(self):
-        mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Havok"}}'
+        mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Hawkeye"}}'
         self.client.publish("explorer/118", mess, qos=1)
+
+
+    def set_korrePos(self):
+        korre_pos = self.data["payload"]
+        startX = int(korre_pos["startX"])
+        startY = int(korre_pos["startY"])
+        startDir = korre_pos["startDirection"]
+        endX = int(korre_pos["endX"])
+        endY = int(korre_pos["endY"])
+        endDir = korre_pos["endDirection"]
+        weight = int(korre_pos["pathWeight"])
+
+        self.aktX = endX
+        self.aktY = endY
+        self.direc = endDir
+
+        self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
+
+        return [(endX, endY), endDir]
 
 
     def pruefDaten(self):
         self.pathStat = "free"
         print(self.planet_Chan)
-        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(15)+', "startY": '+str(37)+', "startDirection": "W", "endX": '+str(15)+', "endY": '+str(39)+', "endDirection": "S", "pathStatus": "'+str(self.pathStat)+'"} }'
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(13)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(13)+', "endY": '+str(38)+', "endDirection": "S", "pathStatus": "'+str(self.pathStat)+'"} }'
         self.client.publish(self.planet_Chan, pruef, qos=1)
 
+    def pruefDaten2(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(13)+', "startY": '+str(38)+', "startDirection": "N", "endX": '+str(14)+', "endY": '+str(39)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten3(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(14)+', "startY": '+str(39)+', "startDirection": "S", "endX": '+str(15)+', "endY": '+str(37)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten4(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(15)+', "startY": '+str(37)+', "startDirection": "E", "endX": '+str(17)+', "endY": '+str(37)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten5(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(17)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(17)+', "endY": '+str(38)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
 
     def pathSelect(self, node):
         result = self.planet.unknown_paths(node)
-        print(result)
         startX = result[0][0]
         startY = result[0][1]
         startDir = result[1].value
@@ -143,12 +189,14 @@ class Communication:
         return self.direc
 
     def serverPath(self):
-        path_server = self.data["playload"]
+        path_server = self.data["payload"]
         startDir = path_server["startDirection"]
 
         self.direc = startDir
 
-        return Direction(starDir)
+        return Direction(startDir)
+
+
 
 
 client = mqtt.Client(client_id=str(uuid.uuid4()),  # client_id has to be unique among ALL users
@@ -161,11 +209,20 @@ com.timer()
 #com.send_test()
 #com.timer()
 
-node = {(15,37): [(Direction.NORTH, -2), (Direction.WEST, -2), (Direction.EAST, -1)]}
-com.pathSelect(node)
-com.timer()
 
 com.pruefDaten()
+com.timer()
+com.pruefDaten2()
+com.timer()
+com.pruefDaten3()
+com.timer()
+com.pruefDaten4()
+com.timer()
+com.pruefDaten5()
+com.timer()
+
+node = {(17,38):[(Direction.NORTH, -2), (Direction.WEST, -2), (Direction.EAST, -1)]}
+com.pathSelect(node)
 com.timer()
 
 

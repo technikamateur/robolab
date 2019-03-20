@@ -181,8 +181,8 @@ class Communication:
         startY = result[0][1]
         startDir = result[1].value
 
-        self.aktX = starX
-        self.aktY = starY
+        self.aktX = startX
+        self.aktY = startY
         self.direc = startDir
 
         select = '{"from":"client", "type":"pathSelect", "payload": {"startX": "'+str(startX)+'", "startY": "'+str(startY)+'", "startDirection": "'+str(startDir)+'"} }'
@@ -195,7 +195,7 @@ class Communication:
 
     # 6. pathSelect from Server:
     def serverPath(self):
-        path_server = self.data["playload"]
+        path_server = self.data["payload"]
         startDir = path_server["startDirection"]
 
         self.direc = startDir
