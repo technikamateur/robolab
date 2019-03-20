@@ -50,13 +50,14 @@ class Planet:
 # start[1]
 #d.update({key:value})
 
-    def unknown_paths(self, node):
+    adds unknown paths
+    def add_unknown_paths(self, node):
         """node should look like:
         {
             currentNode: [(Direction.NORTH, -2), (Direction.EAST, -3)]
         } Definition: -1 = blocked, -2 = pathAvailable, -3 = noPath
         """
-        scannedNodes.append(node)
+        self.scannedNodes.append(node)
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
         if self.paths != None:
@@ -83,18 +84,31 @@ class Planet:
         # return a random existing exit for node
         return random.choice(unknown_paths)[1]
 
+    # direction with unknown path for node
+    def get_direction(self, node):
+        pass
+
+    # returns path to next node from node
+    def get_next_node(self, node):
+        pass
+
+    # check whether node is already scanned
     def node_scanned(self, node):
-        if node in scannedNodes:
+        if node in self.scannedNodes:
             self.logger.info("Node already scanned.")
             return True
         else:
             self.logger.info("Node unknown. Please scan!")
             return False
 
-    def where_to_go(self, node):
-        # should return a way, where to go or maybe a complete way?
-        return None
+    # check whether there ar unknown directions for node
+    def go_direction(self, node):
+        if node in self.unknownPaths:
+            return True
+        else:
+            return False
 
+    # adds path to dict
     def add_path(self, start: Tuple[Tuple[int, int], Direction],
                  target: Tuple[Tuple[int, int], Direction], weight: int):
         """
@@ -137,12 +151,14 @@ class Planet:
                 value = self.unknownPaths[start[0]]
                 for direc in value:
                     if start[1] == direc[1]:
+                        self.logger.info("Path explored. Removing from unknown...")
                         value.remove(direc)
                         break
             elif target[0] in self.unknownPaths:
                 value = self.unknownPaths[target[0]]
                 for direc in value:
                     if target[1] == direc[1]:
+                        self.logger.info("Path explored. Removing from unknown...")
                         value.remove(direc)
                         break
             # now, remove all empty keys
@@ -163,6 +179,7 @@ class Planet:
             self.logger.error("There are unfound targets. Implement it now!")
         # Now unknown paths should be cleaned
 
+    # returns all paths
     def get_paths(
             self
     ) -> Dict[Tuple[int, int],
@@ -186,6 +203,7 @@ class Planet:
         """
         return self.paths
 
+    # returns hopefully shortest path
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]
                       ) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
         """
