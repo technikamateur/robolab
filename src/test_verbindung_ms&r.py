@@ -107,7 +107,7 @@ class Communication:
     def pruefDaten(self):
         self.pathStat = "free"
         print(self.planet_Chan)
-        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(13)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(14)+', "endY": '+str(36)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(13)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(13)+', "endY": '+str(38)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
         print(pruef)
         self.client.subscribe(self.planet_Chan, qos=1)
         self.client.publish(self.planet_Chan, pruef, qos=1)
@@ -137,7 +137,7 @@ com.timer()
 #com.timer()
 com.pruefDaten()
 com.timer()
-node = {(0,1): [(Direction.NORTH, -2), (Direction.WEST, -2)]}
+node = {(0,1): [(Direction.NORTH, -2), (Direction.WEST, -2), (Direction.EAST, -1)]}
 com.pathSelect(node)
 
 
