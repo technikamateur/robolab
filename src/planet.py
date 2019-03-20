@@ -93,7 +93,7 @@ class Planet:
     # returns path to next node from node
     def get_next_node(self, node):
         # maybe there are no paths to discover
-        if self.unknownPaths:
+        if not self.unknownPaths:
             return None
         self.logger.info("Performing graph creation...")
         graphList = {}

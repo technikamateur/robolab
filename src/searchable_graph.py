@@ -19,10 +19,13 @@ class SearchableGraph:
         level = 1
         nextNodeElement = 0
         while foundNode:
+            # check available paths in level
             if not queue[nextNodeElement]:
                 nextNodeElement += 1
                 level += 1
+            # set next node
             nextNode = queue[nextNodeElement].pop()
+            # get nodes from this node
             value = self.graph[nextNode]
             try:
                 known_data = queue[level]
@@ -32,6 +35,8 @@ class SearchableGraph:
                 # dann erweitern
             except IndexError:
                 queue.append(value)
+            # if one of these nodes is missing return it
+            # else keep on searching
             for known in queue[level]:
                 # known node as unknown directions
                 if known in self.unknown:
