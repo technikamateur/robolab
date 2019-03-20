@@ -85,7 +85,7 @@ class Robot:
 				self.ml.command = "run-forever"
 				time.sleep(0.1)
 				end = time.time()
-				print (end-start)
+				#print (end-start)
 				self.speedListR.append(self.mr.speed)
 				self.speedListL.append(self.ml.speed)
 				self.timeList.append(end-start)
