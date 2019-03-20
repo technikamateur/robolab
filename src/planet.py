@@ -105,7 +105,7 @@ class Planet:
 
                 elif key not in graphList:
                     # add node to dict
-                    graphList.update(key: targets[0])
+                    graphList.update({key: targets[0]})
         graph = SearchableGraph(graphList, node, self.unknownPaths.keys())
         target = graph.find_next_node()
         self.logger.info("Found new target node.")
@@ -255,17 +255,21 @@ class Planet:
             # get the path and add directions
             shortestPath = []
             pathExDirection = self.graph.dijkstra()
-            pathExDirection.reverse()
-            for edge in pathExDirection:
-                valueDict = self.paths[edge[0]]
-                for keys, values in valueDict.items():
-                    if edge[1] in values:
-                        shortestPath.append((edge[0], keys))
-                        break
-                    else:
-                        pass
-            shortestPath.reverse()
-            return shortestPath
+            if pathExDirection is not None:
+                pathExDirection.reverse()
+                for edge in pathExDirection:
+                    valueDict = self.paths[edge[0]]
+                    for keys, values in valueDict.items():
+                        if edge[1] in values:
+                            shortestPath.append((edge[0], keys))
+                            break
+                        else:
+                            pass
+                shortestPath.reverse()
+                return shortestPath
+            else:
+                self.logger.warning("Target not reachable")
+                return None
         else:
             self.logger.warning("Path invalid - saving this")
             self.impossibleTarget = target
