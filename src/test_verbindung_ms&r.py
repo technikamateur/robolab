@@ -90,27 +90,103 @@ class Communication:
 
     def typ_Entsch(self): #Test
         #print("schon in typ_Epntsch")
-        if self.data["from"] == "server" and self.data["type"] == "planet":
+        von = self.data["from"]
+        nach = self.data["type"]
+
+        if von == "server" and nach == "planet":
             payload = self.data["payload"]
             planetName = payload["planetName"]
             self.planet_Chan = 'planet/'+planetName+'-118'
             self.pruefDaten()
+
 
     def send_ready(self):
         erk = '{"from": "client", "type": "ready"}'
         self.client.publish("explorer/118", erk, qos=1)
 
     def send_test(self):
-        mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Hawkeye"}}'
+        mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Havok"}}'
         self.client.publish("explorer/118", mess, qos=1)
+
 
     def pruefDaten(self):
         self.pathStat = "free"
         print(self.planet_Chan)
-        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(13)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(13)+', "endY": '+str(38)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
-        print(pruef)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(13)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(13)+', "endY": '+str(38)+', "endDirection": "S", "pathStatus": "'+str(self.pathStat)+'"} }'
         self.client.subscribe(self.planet_Chan, qos=1)
         self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten2(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(13)+', "startY": '+str(38)+', "startDirection": "N", "endX": '+str(14)+', "endY": '+str(39)+', "endDirection": "E", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten3(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(14)+', "startY": '+str(39)+', "startDirection": "S", "endX": '+str(15)+', "endY": '+str(37)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten4(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(15)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(15)+', "endY": '+str(39)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+        '''
+    def pruefDaten5(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(17)+', "startY": '+str(37)+', "startDirection": "N", "endX": '+str(17)+', "endY": '+str(38)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+
+    def pruefDaten6(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(17)+', "startY": '+str(38)+', "startDirection": "N", "endX": '+str(16)+', "endY": '+str(39)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+
+    def pruefDaten7(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(16)+', "startY": '+str(39)+', "startDirection": "S", "endX": '+str(17)+', "endY": '+str(38)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten8(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(17)+', "startY": '+str(38)+', "startDirection": "S", "endX": '+str(17)+', "endY": '+str(37)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten9(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(17)+', "startY": '+str(37)+', "startDirection": "E", "endX": '+str(17)+', "endY": '+str(38)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+    def pruefDaten10(self):
+        self.pathStat = "free"
+        print(self.planet_Chan)
+        pruef = '{"from":"client", "type":"path", "payload": {"startX": '+str(17)+', "startY": '+str(38)+', "startDirection": "N", "endX": '+str(16)+', "endY": '+str(39)+', "endDirection": "W", "pathStatus": "'+str(self.pathStat)+'"} }'
+        self.client.publish(self.planet_Chan, pruef, qos=1)
+
+
+    def set_anderePos(self):
+        add = self.data["payload"]
+        startX = int(add["startX"])
+        startY = int(add["startY"])
+        startDir = add["startDirection"]
+        endX = int(add["endX"])
+        endY = int(add["endY"])
+        endDir = add["endDirection"]
+        status = add["pathStatus"]
+        weight = int(add["pathWeight"])
+
+        self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
+        '''
 
 
     def pathSelect(self, node):
@@ -135,8 +211,30 @@ com.send_ready()
 com.timer()
 #com.send_test()
 #com.timer()
+
 com.pruefDaten()
 com.timer()
+com.pruefDaten2()
+com.timer()
+com.pruefDaten3()
+com.timer()
+com.pruefDaten4()
+com.timer()
+'''
+com.pruefDaten5()
+com.timer()
+com.pruefDaten6()
+com.timer()
+com.pruefDaten7()
+com.timer()
+com.pruefDaten8()
+com.timer()
+com.pruefDaten9()
+com.timer()
+com.pruefDaten10()
+com.timer()
+'''
+
 node = {(0,1): [(Direction.NORTH, -2), (Direction.WEST, -2), (Direction.EAST, -1)]}
 com.pathSelect(node)
 

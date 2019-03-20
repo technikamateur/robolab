@@ -39,6 +39,10 @@ class Communication:
         self.topic = "explorer/118"
         self.planet_Chan = None
 
+        self.aktX = None
+        self.aktY = None
+        self.direc = None
+
 
 
     # this is a helper method that catches errors and prints them
@@ -83,14 +87,13 @@ class Communication:
 
     def typ_Entsch(self):
         if self.data["from"] == "server" and self.data["type"] == "planet":
-            payload = self.data["payload"]
-            planetName = payload["planetName"]
-            self.planet_Chan = 'planet/'+planetName+'-118'
             self.setPlanetInfo()
         elif self.data["from"] == "server" and self.data["type"] == "path":
             self.set_korrePos()
         elif self.data["from"] == "server" and self.data["type"] == "pathUnveiled":
-            self.set_anderePos()
+            self.speich_path()
+
+
         elif self.data["from"] == "server" and self.data["type"] == "pathSelect":
             self.serverPath()
         elif self.data["from"] == "server" and self.data["type"] == "target":
@@ -114,10 +117,10 @@ class Communication:
         planetName = playload["planetName"]
         self.planet_Chan = 'planet/'+planetName+''+str(-118)+'
         self.client.subscribe(self.planet_Chan, qos=1)
-        startX = int(self.data["startX"])
-        startY = int(self.data["startY"])
+        self.aktX = int(self.data["startX"])
+        self.aktY = int(self.data["startY"])
 
-        return (startX, startY)
+        return (self.aktX, self.aktY)
 
 
     # 3. gefahrenden Pfad und geschätzte Posision zu MS schicken
@@ -130,9 +133,11 @@ class Communication:
         endDir = message[1][1]
         status = message[2]
 
+        self.aktX = endX
+        self.aktY = endY
+
         pp = '{"from":"client", "type":"path", "payload": {"startX": "'+str(startX)+'", "startY": "'+str(startY)+'", "startDirection": "'+startDir+'", "endX": "'+str(endX)+'", "endY": "'+str(endY)+'", "endDirection": "'+endDir+'", "pathStatus": "'+status+'"}}'
 
-        self.client.subscribe(self.planet_Chan, qos=1)
         self.client.publish(self.planet_Chan, pp, qos=1)   #planet/<CHANNEL>,<CHANNEL> = Planet name - 118
 
 
@@ -145,15 +150,17 @@ class Communication:
         endX = int(korre_pos["endX"])
         endY = int(korre_pos["endY"])
         endDir = korre_pos["endDirection"]
-        status = korre_pos["pathStatus"]
         weight = int(korre_pos["pathWeight"])
+
+        self.aktX = endX
+        self.aktY = endY
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
 
         return [(endX, endY), endDir]
 
     # Pfad und Position von anderen Robert gefunden haben, direkt hinzufügen:
-    def set_anderePos(self):
+    def speich_path(self):
         add = self.data["payload"]
         startX = int(add["startX"])
         startY = int(add["startY"])
@@ -161,7 +168,6 @@ class Communication:
         endX = int(add["endX"])
         endY = int(add["endY"])
         endDir = add["endDirection"]
-        status = add["pathStatus"]
         weight = int(add["pathWeight"])
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
@@ -175,6 +181,10 @@ class Communication:
         startY = result[0][1]
         startDir = result[1].value
 
+        self.aktX = starX
+        self.aktY = starY
+        self.direc = startDir
+
         select = '{"from":"client", "type":"pathSelect", "payload": {"startX": "'+str(startX)+'", "startY": "'+str(startY)+'", "startDirection": "'+str(startDir)+'"} }'
 
         self.client.publish(self.planet_Chan, select, qos=1)
@@ -186,6 +196,8 @@ class Communication:
         path_server = self.data["playload"]
         startDir = path_server["startDirection"]
 
+        self.direc = startDir
+
         return Direction(starDir)
 
 
@@ -195,6 +207,8 @@ class Communication:
         target = self.data["playload"]
         targetX = int(target["targetX"])
         targetY = int(target["targetY"])
+
+        self.planet.shortest_path((self.aktX, self.aktY), (targetX, targetY))
 
         return (targetX, targetY)
 
