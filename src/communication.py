@@ -136,7 +136,7 @@ class Communication:
         self.aktX = endX
         self.aktY = endY
 
-        pp = '{"from":"client", "type":"path", "payload": {"startX": "'+str(startX)+'", "startY": "'+str(startY)+'", "startDirection": "'+startDir+'", "endX": "'+str(endX)+'", "endY": "'+str(endY)+'", "endDirection": "'+endDir+'", "pathStatus": "'+status+'"}}'
+        pp = '{"from":"client", "type":"path", "payload": {"startX": '+str(startX)+', "startY": '+str(startY)+', "startDirection": "'+startDir+'", "endX": '+str(endX)+', "endY": '+str(endY)+', "endDirection": "'+endDir+'", "pathStatus": "'+status+'"}}'
 
         self.client.publish(self.planet_Chan, pp, qos=1)   #planet/<CHANNEL>,<CHANNEL> = Planet name - 118
 
@@ -185,7 +185,7 @@ class Communication:
         self.aktY = startY
         self.direc = startDir
 
-        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": "'+str(startX)+'", "startY": "'+str(startY)+'", "startDirection": "'+str(startDir)+'"} }'
+        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(startX)+', "startY": '+str(startY)+', "startDirection": "'+startDir+'"} }'
 
         self.client.publish(self.planet_Chan, select, qos=1)
 
