@@ -60,7 +60,7 @@ class Planet:
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
         if self.paths != None:
-            # remove already known exits or node
+            # get known directions for node
             known_paths = self.paths[key]
             # remove paths which are already known
             unknown_paths = [
@@ -75,9 +75,12 @@ class Planet:
                     else:
                         pass
             """
-        unknown_paths = [x for x in unknown_paths if -1 not in x]
+        # remove blocked or not existing paths
+        unknown_paths = [
+            x for x in unknown_paths if -1 not in x or -3 not in x
+        ]
         self.unknownPaths.update({key: unknown_paths})
-        # return a random existing exit
+        # return a random existing exit for node
         return random.choice(unknown_paths)[1]
 
     def node_scanned(self, node):
@@ -128,6 +131,24 @@ class Planet:
                     {target[0]: {
                          target[1]: (start[0], start[1], weight)
                      }})
+            # check the current start and target existence in
+            # unknownPaths and remove them
+            if start[0] in self.unknownPaths:
+                value = self.unknownPaths[start[0]]
+                for direc in value:
+                    if start[1] == direc[1]:
+                        value.remove(direc)
+                        break
+            elif target[0] in self.unknownPaths:
+                value = self.unknownPaths[target[0]]
+                for direc in value:
+                    if target[1] == direc[1]:
+                        value.remove(direc)
+                        break
+            # now, remove all empty keys
+            for node in list(self.unknownPaths.keys()):
+                if self.unknownPaths[node] == []:
+                    del self.unknownPaths[node]
 
         elif weight == -1:
             # if path is blocked
