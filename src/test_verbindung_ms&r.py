@@ -132,13 +132,15 @@ class Communication:
         startY = result[0][1]
         startDir = result[1].value
 
-        self.startX = startX
-        self.startY = startY
+        self.aktX = startX
+        self.aktY = startY
         self.direc = startDir
 
         select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(startX)+', "startY": '+str(startY)+', "startDirection": "'+str(startDir)+'"} }'
 
         self.client.publish(self.planet_Chan, select, qos=1)
+
+        return self.direc
 
     def serverPath(self):
         path_server = self.data["playload"]
