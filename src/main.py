@@ -34,7 +34,7 @@ def run():
         bob.turn_by_direction(Direction(direction_str))
         bob.drive(100,1.0) #100 und 1.1 funktioniert
     #print(bob.mesureBrightness())
-    #bob.turn_by_degree(90,100)
+    #bob.turn_by_degree(180,500)
 
 
 # DO NOT EDIT
