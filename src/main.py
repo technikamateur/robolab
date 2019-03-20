@@ -5,6 +5,7 @@ import uuid
 import paho.mqtt.client as mqtt
 from planet import Direction, Planet
 from communication import Communication
+from odometry import Robot
 
 client = None  # DO NOT EDIT
 
@@ -21,6 +22,19 @@ def run():
     # the execution of all code shall be started from within this function
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER
     print("Hello World!")
+    bob = Robot()
+    while True:
+        direction_str = input("Input: ")
+        """kp = input("Kp: ")
+        kp = float(kp)
+        ki = input("Ki: ")
+        ki = float(ki)
+        kd = input("Kd: ")
+        kd = float(kd)"""
+        bob.turn_by_direction(Direction(direction_str))
+        bob.drive(100,1.0) #100 und 1.1 funktioniert
+    #print(bob.mesureBrightness())
+    #bob.turn_by_degree(180,500)
 
 
 # DO NOT EDIT
