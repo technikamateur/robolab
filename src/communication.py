@@ -42,6 +42,8 @@ class Communication:
         self.aktX = None
         self.aktY = None
         self.direc = None
+        self.shortestPath = None
+        self.exploringPath = None
 
 
 
@@ -124,7 +126,7 @@ class Communication:
 
 
     # 3. gefahrenden Pfad und geschätzte Posision zu MS schicken
-    def pruefDaten(self, message):
+    def discovered_path(self, message):
         startX = message[0][0][0]
         startY = message[0][0][1]
         startDir = message[0][1]
@@ -133,12 +135,10 @@ class Communication:
         endDir = message[1][1]
         status = message[2]
 
-        self.aktX = endX
-        self.aktY = endY
-
         pp = '{"from":"client", "type":"path", "payload": {"startX": '+str(startX)+', "startY": '+str(startY)+', "startDirection": "'+startDir+'", "endX": '+str(endX)+', "endY": '+str(endY)+', "endDirection": "'+endDir+'", "pathStatus": "'+status+'"}}'
 
         self.client.publish(self.planet_Chan, pp, qos=1)   #planet/<CHANNEL>,<CHANNEL> = Planet name - 118
+        self.timer()
 
 
     # 4. Korregierte Position zu Planet schicken & Pfadaufdeckung und Pfadwahl:
@@ -146,10 +146,10 @@ class Communication:
         korre_pos = self.data["payload"]
         startX = int(korre_pos["startX"])
         startY = int(korre_pos["startY"])
-        startDir = korre_pos["startDirection"]
+        startDir = Direction(korre_pos["startDirection"])
         endX = int(korre_pos["endX"])
         endY = int(korre_pos["endY"])
-        endDir = korre_pos["endDirection"]
+        endDir = Direction(korre_pos["endDirection"])
         weight = int(korre_pos["pathWeight"])
 
         self.aktX = endX
@@ -164,32 +164,51 @@ class Communication:
         add = self.data["payload"]
         startX = int(add["startX"])
         startY = int(add["startY"])
-        startDir = add["startDirection"]
+        startDir = Direction(add["startDirection"])
         endX = int(add["endX"])
         endY = int(add["endY"])
-        endDir = add["endDirection"]
+        endDir = Direction(add["endDirection"])
         weight = int(add["pathWeight"])
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
 
-
+    def node_scanned(self):
+        return self.planet.node_scanned((self.aktX, self.aktY))
 
     # 5. pathSelect Publish on planet:
-    def pathSelect(self, node):
-        result = self.planet.unknown_paths(node)
-        startX = result[0][0]
-        startY = result[0][1]
-        startDir = result[1].value
+    def where_to_go(self):
+        if self.shortestPath == None or not self.shortestPath:
+            if self.exploringPath == None or not self.exploringPath:
+                if self.planet.go_direction((self.aktX, self.aktY)):
+                    return self.planet.get_direction((self.aktX, self.aktY))
+                else:
+                    self.exploringPath = self.planet.get_next_node((self.aktX, self.aktY))
+                    if self.exploringPath == None:
+                        self.explor_compl()
+                    else:
+                        return self.exploringPath.pop(0)[1]
+            else:
+                return self.exploringPath.pop(0)[1]
+            """
+            self.shortestPath = None
+            result = self.planet.unknown_paths((self.aktX, self.aktY))
+            startX = result[0][0]
+            startY = result[0][1]
+            startDir = result[1].value
 
-        self.aktX = startX
-        self.aktY = startY
-        self.direc = startDir
+            self.aktX = startX
+            self.aktY = startY
+            self.direc = startDir
+            """
+            select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(startX)+', "startY": '+str(startY)+', "startDirection": "'+startDir+'"} }'
 
-        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(startX)+', "startY": '+str(startY)+', "startDirection": "'+startDir+'"} }'
+            self.client.publish(self.planet_Chan, select, qos=1)
+            self.timer()
+            return self.direc
 
-        self.client.publish(self.planet_Chan, select, qos=1)
+        else:
+            return self.shortestPath.pop(0)[1]
 
-        return self.direc
 
 
 
@@ -209,16 +228,15 @@ class Communication:
         target = self.data["playload"]
         targetX = int(target["targetX"])
         targetY = int(target["targetY"])
-
-        self.planet.shortest_path((self.aktX, self.aktY), (targetX, targetY))
-
-        return (targetX, targetY)
+        self.target = (targetX, targetY)
+        self.shortestPath = planet.shortest_path((self.aktX, self.aktY), (targetX, targetY))
 
 
     # 8. Abschluss der Erkundung:
     def target_Reached(self):
         targetR = '{"from":"client", "type":"targetReached", "payload": {"message": "target is reached!"} }'
         self.client.publish(self.topic, targetR, qos=1)
+        self.timer()
 
 
     # 9. ExplorationCompleted:

@@ -61,7 +61,7 @@ class Planet:
         self.scannedNodes.append(node)
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
-        if self.paths:
+        if not self.paths:
             # remove already known exits or node
             known_paths = self.paths[key]
             # remove paths which are already known
@@ -251,12 +251,14 @@ class Planet:
 
         if self.graph.pathPossible():
             self.logger.info("Path valid - returning shortest path now.")
-            #self.graph.printAll()
+            self.graph.printAll()
             # get the path and add directions
             shortestPath = []
             pathExDirection = self.graph.dijkstra()
             if pathExDirection is not None:
+                print(pathExDirection)
                 pathExDirection.reverse()
+                print(pathExDirection)
                 for edge in pathExDirection:
                     valueDict = self.paths[edge[0]]
                     for keys, values in valueDict.items():
