@@ -276,3 +276,9 @@ class Planet:
             self.logger.warning("Path invalid - saving this")
             self.impossibleTarget = target
             return None
+
+    def getImpossibleTarget(self):
+        return self.impossibleTarget
+
+    def resetImpossibleTarget(self):
+        self.impossibleTarget = None

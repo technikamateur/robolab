@@ -156,6 +156,10 @@ class Communication:
         self.aktY = endY
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
+            if planet.getImpossibleTarget() is not None:
+                self.shortestPath = planet.shortest_path((self.aktX, self.aktY), planet.getImpossibleTarget())
+                if self.shortestPath is not None:
+                    planet.resetImpossibleTarget()
 
         return [(endX, endY), endDir]
 
@@ -171,17 +175,30 @@ class Communication:
         weight = int(add["pathWeight"])
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
+        if planet.getImpossibleTarget() is not None:
+            self.shortestPath = planet.shortest_path((self.aktX, self.aktY), planet.getImpossibleTarget())
+            if self.shortestPath is not None:
+                planet.resetImpossibleTarget()
+
 
     def node_scanned(self):
         return self.planet.node_scanned((self.aktX, self.aktY))
 
+    def scan_result(self, node):
+        self.planet.add_unknown_paths(node)
+
     # 5. pathSelect Publish on planet:
     def where_to_go(self):
+        # check if shortest path is running
         if self.shortestPath == None or not self.shortestPath:
+            # check if there is a running path to a node to discover
             if self.exploringPath == None or not self.exploringPath:
+                # check where to get search for next target
                 if self.planet.go_direction((self.aktX, self.aktY)):
+                    # search on current node
                     return self.planet.get_direction((self.aktX, self.aktY))
                 else:
+                    # go to a node
                     self.exploringPath = self.planet.get_next_node((self.aktX, self.aktY))
                     if self.exploringPath == None:
                         self.explor_compl()
@@ -230,6 +247,8 @@ class Communication:
         targetY = int(target["targetY"])
         self.target = (targetX, targetY)
         self.shortestPath = planet.shortest_path((self.aktX, self.aktY), (targetX, targetY))
+        if self.shortestPath is not None:
+            self.exploringPath = None
 
 
     # 8. Abschluss der Erkundung:
