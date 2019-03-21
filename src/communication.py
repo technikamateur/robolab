@@ -17,7 +17,7 @@ class Communication:
         """ Initializes communication module, connect to server, subscribe, etc. """
         # THESE TWO VARIABLES MUST NOT BE CHANGED
         self.client = mqtt_client
-        self.client.on_message = self.on_message
+        #self.client.on_message = self.on_message
         self.planet = planet
         # ADD YOUR VARIABLES HERE
         # Basic configuration of MQTT
@@ -71,18 +71,17 @@ class Communication:
         print("\n")
 
         self.data = data
-
-        self.timer()
         self.typ_Entsch()
 
 
 
     #Timer: jede 2 Sekunden warten:
     def timer(self):
+        print("Timer startet")
         t0 = time.time()
         while (time.time()-t0) < 2:
             pass
-        print("neue Message kommt!")
+        print("Timer fertig")
 
 
 
@@ -113,6 +112,7 @@ class Communication:
         erk = '{"from": "client", "type": "ready"}'
         mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Hawkeye"}}'
         self.client.publish("explorer/118", erk, qos=1)
+        self.timer()
         self.client.publish("explorer/118", mess, qos=1)
 
     # 2.PlanetName und StartKoordinanten übergeben
@@ -180,7 +180,7 @@ class Communication:
         weight = int(add["pathWeight"])
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
-        if planet.getImpossibleTarget() is not None:
+        if self.planet.getImpossibleTarget() is not None:
             self.shortestPath = planet.shortest_path((self.aktX, self.aktY), planet.getImpossibleTarget())
             if self.shortestPath is not None:
                 planet.resetImpossibleTarget()
@@ -199,6 +199,8 @@ class Communication:
             # check if there is a running path to a node to discover
             if self.exploringPath == None or not self.exploringPath:
                 # check where to get search for next target
+                print("WICHTIG")
+                print(self.planet.go_direction((self.aktX, self.aktY)))
                 if self.planet.go_direction((self.aktX, self.aktY)):
                     # search on current node
                     startDirPlanet = self.planet.get_direction((self.aktX, self.aktY))
@@ -213,11 +215,16 @@ class Communication:
                 startDirPlanet = self.exploringPath.pop(0)[1]
         else:
             startDirPlanet = self.shortestPath.pop(0)[1]
+        print("Daniels Rihtung:")
+        print(startDirPlanet)
+        startDirPlanetConverted = startDirPlanet.value
 
-        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(self.aktX)+', "startY": '+str(self.aktY)+', "startDirection": "'+startDirPlanet+'"} }'
+        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(self.aktX)+', "startY": '+str(self.aktY)+', "startDirection": "'+str(startDirPlanetConverted)+'"} }'
 
         self.client.publish(self.planet_Chan, select, qos=1)
         self.timer()
+        print("Muddas Richtung")
+        print(self.direc)
         if self.direc is None:
             return startDirPlanet
         else:

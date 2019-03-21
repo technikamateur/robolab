@@ -59,9 +59,10 @@ class Planet:
         } Definition: -1 = blocked, -2 = pathAvailable, -3 = noPath
         """
         self.scannedNodes.append(node)
+        print(node)
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
-        if not self.paths:
+        if self.paths:
             # remove already known exits or node
             known_paths = self.paths[key]
             # remove paths which are already known
@@ -78,9 +79,13 @@ class Planet:
                         pass
             """
         # remove blocked or not existing paths
-        unknown_paths = [
-            x for x in unknown_paths if -1 not in x or -3 not in x
-        ]
+        print("ungefilterte Knoten")
+        print(unknown_paths)
+        #or -3 not in x
+        unknown_paths = [x for x in unknown_paths if -1 not in x]
+        unknown_paths = [x for x in unknown_paths if -3 not in x]
+        print("Gefilterte Knoten")
+        print(unknown_paths)
         self.unknownPaths.update({key: unknown_paths})
         # return a random existing exit
         return [key, random.choice(unknown_paths)[0]]
@@ -88,7 +93,7 @@ class Planet:
     # direction with unknown path for node
     def get_direction(self, node):
         value = self.unknownPaths[node]
-        return random.choice(value)[1]
+        return random.choice(value)[0]
 
     # returns path to next node from node
     def get_next_node(self, node):
@@ -123,6 +128,8 @@ class Planet:
     # check whether there are unknown directions for node
     def go_direction(self, node):
         if node in self.unknownPaths:
+            return True
+        elif not self.paths:
             return True
         else:
             return False

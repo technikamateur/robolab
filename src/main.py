@@ -26,10 +26,10 @@ def run():
     bob.drive()
     planet = Planet()
     com = Communication(client, planet)
-    bob.setView = Direction.NORTH
+    bob.setView(Direction.NORTH)
     com.timer()
-    bob.setPosition = com.get_startP()
-    if com.node_scanned():
+    bob.setPosition(com.get_startP())
+    if not com.node_scanned():
         com.scan_result(bob.scanPoint(Direction.SOUTH))
     bob.turn_by_direction(com.where_to_go())
     bob.drive()
@@ -38,7 +38,7 @@ def run():
         com.discovered_path(bob.createMessage())
         bob.setPosition(com.set_korrPos()[0])
         bob.setView(com.set_korrPos()[1])
-        if com.node_scanned():
+        if not com.node_scanned():
             com.scan_result(bob.scanPoint())
         direction = com.where_to_go()
         if direction is None:
