@@ -24,7 +24,7 @@ class Robot:
 		self.timeList = []
 		self.directionList = []
 
-	def drive(self, bs, kp, ki = 0, kd = 0, gray = 250):	#main driving method
+	def drive(self, bs = 100, kp = 1, ki = 0, kd = 0, gray = 250):	#main driving method
 		self.cs.mode = "RGB-RAW"
 		self.speedListL = []
 		self.speedListR = []
@@ -106,16 +106,8 @@ class Robot:
 		self.mr.stop()
 		self.ml.stop()
 		
-		
-		
 		new_angle = self.calculateAngleAndNewPosition()[0]
 		self.view = self.angle_to_direction(new_angle)
-		print (self.view)
-		print (self.createMessage())
-		print (self.view)
-		
-		directionList = self.scanPoint()
-		print (directionList)
 		
 	def calculateAngleAndNewPosition(self):					#Odometry-Function
 		u_wheel = self.d_wheel * math.pi
@@ -316,10 +308,6 @@ class Robot:
 	def setView(self, direction):
 		self.view = direction
 	
-	def setUpTest(self, timeList, speedListR, speedListL):
-		self.timeList = timeList
-		self.speedListL = speedListL
-		self.speedListR = speedListR
 #  Suggestion: 	implement odometry as class that is not using the ev3dev.ev3 package
 # 				establish value exchange with main driving class via getters and setters
 
