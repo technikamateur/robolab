@@ -122,6 +122,9 @@ class Communication:
         self.aktX = int(self.data["startX"])
         self.aktY = int(self.data["startY"])
 
+        #return (self.aktX, self.aktY)
+
+    def get_startP(self):
         return (self.aktX, self.aktY)
 
 
