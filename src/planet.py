@@ -3,7 +3,9 @@
 from enum import Enum, unique
 from typing import List, Optional, Tuple, Dict
 from simpleGraph import SimpleGraph
+from searchable_graph import SearchableGraph
 import logging
+import random
 
 # IMPORTANT NOTE: DO NOT IMPORT THE ev3dev.ev3 MODULE IN THIS FILE
 
@@ -35,9 +37,9 @@ class Planet:
 
     def __init__(self):
         """ Initializes the data structure """
-        self.target = None
         self.paths = {}
-        self.weights = {}
+        self.unknownPaths = {}
+        self.scannedNodes = []
         self.graph = None
         self.impossibleTarget = None
         # creating logger
@@ -49,6 +51,83 @@ class Planet:
 # start[1]
 #d.update({key:value})
 
+    # adds unknown paths
+    def add_unknown_paths(self, node):
+        """node should look like:
+        {
+            currentNode: [(Direction.NORTH, -2), (Direction.EAST, -3)]
+        } Definition: -1 = blocked, -2 = pathAvailable, -3 = noPath
+        """
+        self.scannedNodes.append(node)
+        key = list(node.keys())[0]
+        unknown_paths = list(node.values())[0]
+        if not self.paths:
+            # remove already known exits or node
+            known_paths = self.paths[key]
+            # remove paths which are already known
+            unknown_paths = [
+                unknown for known in known_paths for unknown in unknown_paths
+                if known not in unknown
+            ]
+            """ Funktion drüber soll das machen
+            for direc in known_paths:
+                for unknown in unknown_paths:
+                    if direc not in element:
+                        real_unknown_paths.append(unknown)
+                    else:
+                        pass
+            """
+        # remove blocked or not existing paths
+        unknown_paths = [
+            x for x in unknown_paths if -1 not in x or -3 not in x
+        ]
+        self.unknownPaths.update({key: unknown_paths})
+        # return a random existing exit
+        return [key, random.choice(unknown_paths)[0]]
+
+    # direction with unknown path for node
+    def get_direction(self, node):
+        value = self.unknownPaths[node]
+        return random.choice(value)[1]
+
+    # returns path to next node from node
+    def get_next_node(self, node):
+        # maybe there are no paths to discover
+        if not self.unknownPaths:
+            return None
+        self.logger.info("Performing graph creation...")
+        graphList = {}
+        for key, value in self.paths.items():
+            for targets in value.values():
+                if key in graphList:
+                    # node in dict
+                    graphList[key].append(targets[0])
+
+                elif key not in graphList:
+                    # add node to dict
+                    graphList.update({key: targets[0]})
+        graph = SearchableGraph(graphList, node, self.unknownPaths.keys())
+        target = graph.find_next_node()
+        self.logger.info("Found new target node.")
+        return self.shortest_path(node, target)
+
+    # check whether node is already scanned
+    def node_scanned(self, node):
+        if node in self.scannedNodes:
+            self.logger.info("Node already scanned.")
+            return True
+        else:
+            self.logger.info("Node unknown. Please scan!")
+            return False
+
+    # check whether there are unknown directions for node
+    def go_direction(self, node):
+        if node in self.unknownPaths:
+            return True
+        else:
+            return False
+
+    # adds path to dict
     def add_path(self, start: Tuple[Tuple[int, int], Direction],
                  target: Tuple[Tuple[int, int], Direction], weight: int):
         """
@@ -64,44 +143,62 @@ class Planet:
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
-                self.paths[start[0]].update({
-                    start[1]: (target[0], target[1], weight)
-                })
+                self.paths[start[0]].update(
+                    {start[1]: (target[0], target[1], weight)})
 
             elif start[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    start[0]: {
-                        start[1]: (target[0], target[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {start[0]: {
+                         start[1]: (target[0], target[1], weight)
+                     }})
 
             if target[0] in self.paths:
                 # node in dict
-                self.paths[target[0]].update({
-                    target[1]: (start[0], start[1], weight)
-                })
+                self.paths[target[0]].update(
+                    {target[1]: (start[0], start[1], weight)})
 
             elif target[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    target[0]: {
-                        target[1]: (start[0], start[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {target[0]: {
+                         target[1]: (start[0], start[1], weight)
+                     }})
+            # check the current start and target existence in
+            # unknownPaths and remove them
+            if start[0] in self.unknownPaths:
+                value = self.unknownPaths[start[0]]
+                for direc in value:
+                    if start[1] == direc[1]:
+                        self.logger.info("Path explored. Removing from unknown...")
+                        value.remove(direc)
+                        break
+            elif target[0] in self.unknownPaths:
+                value = self.unknownPaths[target[0]]
+                for direc in value:
+                    if target[1] == direc[1]:
+                        self.logger.info("Path explored. Removing from unknown...")
+                        value.remove(direc)
+                        break
+            # now, remove all empty keys
+            for node in list(self.unknownPaths.keys()):
+                if self.unknownPaths[node] == []:
+                    del self.unknownPaths[node]
 
         elif weight == -1:
             # if path is blocked
             # I can not remember path is blocked or not, after scanning node again
-            self.logger.warn("Path is blocked:")
-            self.logger.warn(start)
+            self.logger.warning("Path is blocked:")
+            self.logger.warning(start)
             pass
         else:
             self.logger.error("Path could not be added!")
 
         if self.impossibleTarget is not None:
             self.logger.error("There are unfound targets. Implement it now!")
+        # Now unknown paths should be cleaned
 
+    # returns all paths
     def get_paths(
             self
     ) -> Dict[Tuple[int, int],
@@ -125,6 +222,7 @@ class Planet:
         """
         return self.paths
 
+    # returns hopefully shortest path
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]
                       ) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
         """
@@ -157,18 +255,30 @@ class Planet:
             # get the path and add directions
             shortestPath = []
             pathExDirection = self.graph.dijkstra()
-            pathExDirection.reverse()
-            for edge in pathExDirection:
-                valueDict = self.paths[edge[0]]
-                for keys, values in valueDict.items():
-                    if edge[1] in values:
-                        shortestPath.append((edge[0], keys))
-                        break
-                    else:
-                        pass
-            shortestPath.reverse()
-            return shortestPath
+            if pathExDirection is not None:
+                print(pathExDirection)
+                pathExDirection.reverse()
+                print(pathExDirection)
+                for edge in pathExDirection:
+                    valueDict = self.paths[edge[0]]
+                    for keys, values in valueDict.items():
+                        if edge[1] in values:
+                            shortestPath.append((edge[0], keys))
+                            break
+                        else:
+                            pass
+                shortestPath.reverse()
+                return shortestPath
+            else:
+                self.logger.warning("Target not reachable")
+                return None
         else:
-            self.logger.warn("Path invalid - saving this")
+            self.logger.warning("Path invalid - saving this")
             self.impossibleTarget = target
             return None
+
+    def getImpossibleTarget(self):
+        return self.impossibleTarget
+
+    def resetImpossibleTarget(self):
+        self.impossibleTarget = None

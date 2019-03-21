@@ -23,6 +23,11 @@ def run():
     print("Hello World!")
 
 
+    planet = Planet()
+    com = Communication(client, planet)
+    com.timer()
+
+
 # DO NOT EDIT
 if __name__ == '__main__':
     run()

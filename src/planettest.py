@@ -28,57 +28,34 @@ class ExampleTestPlanet(unittest.TestCase):
         # set your data structure
         self.planet = Planet()
 
-        # add the paths
-        self.planet.add_path(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
-        self.planet.add_path(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 1)
+        # add the paths: Planet Doctor Starnge (with loop)
+        self.planet.add_path(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 50)
+        self.planet.add_path(((0, 1), Direction.NORTH), ((1, 2), Direction.WEST), 70)
+        self.planet.add_path(((1, 2), Direction.SOUTH), ((2, 0), Direction.WEST), 120)
+        self.planet.add_path(((2, 0), Direction.NORTH), ((2, 2), Direction.SOUTH), 100)
+        # loop
+        self.planet.add_path(((2, 2), Direction.NORTH), ((2, 2), Direction.WEST), 100)
+        self.planet.add_path(((2, 2), Direction.EAST), ((3, 2), Direction.WEST), 50)
+        self.planet.add_path(((3, 2), Direction.EAST), ((4, 1), Direction.NORTH), 70)
+        self.planet.add_path(((3, 2), Direction.SOUTH), ((4, 1), Direction.WEST), 150)
+        self.planet.add_path(((4, 1), Direction.SOUTH), ((4, 0), Direction.NORTH), 50)
+        self.planet.add_path(((4, 1), Direction.EAST), ((4, 0), Direction.EAST), 70)
+        self.planet.add_path(((4, 0), Direction.WEST), ((2, 0), Direction.EAST), 100)
 
-    def test_target_not_reachable_with_loop(self):
-        # does the shortest path algorithm loop infinitely?
-        # there is no shortest path
-        self.assertIsNone(self.planet.shortest_path((0, 0), (1, 2)))
-
-
-class YourFirstTestPlanet(unittest.TestCase):
-    def setUp(self):
-        """
-        Instantiates the planet data structure and fills it with paths
-
-        MODEL YOUR TEST PLANET HERE (if you'd like):
-
-        """
-        # set your data structure
-        self.planet = Planet()
-
-        # ADD YOUR PATHS HERE:
-        # self.planet.add_path(...)
-
-    def test_integrity(self):
-        # were all paths added correctly to the planet
-        # check if add_path() works by using get_paths()
-        self.fail('implement me!')
 
     def test_empty_planet(self):
-        self.fail('implement me!')
+        self.assertIsNotNone(self.planet.get_paths())
+        self.assertNotEqual(self.planet.get_paths(), {})
 
     def test_target_not_reachable(self):
-        self.fail('implement me!')
+        # does the shortest path algorithm loop infinitely?
+        # there is no shortest path
+        self.assertIsNone(self.planet.shortest_path((0, 0), (5, 0)))
 
     def test_shortest_path(self):
-        # at least 2 possible paths
-        self.fail('implement me!')
-
-    def test_same_length(self):
-        # at least 2 possible paths with the same weight
-        self.fail('implement me!')
-
-    def test_shortest_path_with_loop(self):
         # does the shortest path algorithm loop infinitely?
-        # there is a shortest path
-        self.fail('implement me!')
-
-    def test_target_not_reachable_with_loop(self):
         # there is no shortest path
-        self.fail('implement me!')
+        self.assertEqual(self.planet.shortest_path((0, 0), (4, 1)), [((0, 0), Direction.NORTH), ((0, 1), Direction.NORTH), ((1, 2), Direction.SOUTH), ((2, 0), Direction.EAST), ((4, 0), Direction.NORTH)])
 
 
 if __name__ == "__main__":
