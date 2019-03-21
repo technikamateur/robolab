@@ -26,7 +26,7 @@ def run():
     bob.drive()
     planet = Planet()
     com = Communication(client, planet)
-    bob.setView(Direction.NORTH)
+    bob.setView(Direction.SOUTH)
     com.timer()
     bob.setPosition(com.get_startP())
     if not com.node_scanned():
@@ -36,8 +36,9 @@ def run():
     while True:
         #got to point
         com.discovered_path(bob.createMessage())
-        bob.setPosition(com.set_korrPos()[0])
-        bob.setView(com.set_korrPos()[1])
+        position = com.get_korre_pos()
+        bob.setPosition(position[0])
+        bob.setView(position[1])
         if not com.node_scanned():
             com.scan_result(bob.scanPoint())
         direction = com.where_to_go()

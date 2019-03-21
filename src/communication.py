@@ -44,6 +44,7 @@ class Communication:
         self.direc = None
         self.shortestPath = None
         self.exploringPath = None
+        self.ourDirec = None
 
 
 
@@ -90,8 +91,10 @@ class Communication:
         if self.data["from"] == "server" and self.data["type"] == "planet":
             self.setPlanetInfo()
         elif self.data["from"] == "server" and self.data["type"] == "path":
+            print("Ich bin bei path")
             self.set_korrePos()
         elif self.data["from"] == "server" and self.data["type"] == "pathUnveiled":
+            print("Ich bin bei geschenktem path")
             self.speich_path()
 
 
@@ -159,14 +162,22 @@ class Communication:
 
         self.aktX = endX
         self.aktY = endY
+        self.ourDirec = endDir
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
-        if planet.getImpossibleTarget() is not None:
-            self.shortestPath = planet.shortest_path((self.aktX, self.aktY), planet.getImpossibleTarget())
+        if self.planet.getImpossibleTarget() is not None:
+            self.shortestPath = planet.shortest_path((self.aktX, self.aktY), self.planet.getImpossibleTarget())
             if self.shortestPath is not None:
-                planet.resetImpossibleTarget()
-
+                self.planet.resetImpossibleTarget()
+        print("---")
+        print("set_korre Koordinaten")
+        print(self.aktX)
+        print(self.aktY)
+        print("---")
         return [(endX, endY), endDir]
+
+    def get_korre_pos(self):
+        return ((self.aktX, self.aktY), self.ourDirec)
 
     # Pfad und Position von anderen Robert gefunden haben, direkt hinzufügen:
     def speich_path(self):
@@ -181,10 +192,14 @@ class Communication:
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
         if self.planet.getImpossibleTarget() is not None:
-            self.shortestPath = planet.shortest_path((self.aktX, self.aktY), planet.getImpossibleTarget())
+            self.shortestPath = self.planet.shortest_path((endX, endY), self.planet.getImpossibleTarget())
             if self.shortestPath is not None:
-                planet.resetImpossibleTarget()
-
+                self.planet.resetImpossibleTarget()
+        print("---")
+        print("speich Koordinaten")
+        print(self.aktX)
+        print(self.aktY)
+        print("---")
 
     def node_scanned(self):
         return self.planet.node_scanned((self.aktX, self.aktY))
@@ -253,7 +268,7 @@ class Communication:
         targetX = int(target["targetX"])
         targetY = int(target["targetY"])
         self.target = (targetX, targetY)
-        self.shortestPath = planet.shortest_path((self.aktX, self.aktY), (targetX, targetY))
+        self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY), (targetX, targetY))
         if self.shortestPath is not None:
             self.exploringPath = None
 

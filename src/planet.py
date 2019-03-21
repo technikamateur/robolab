@@ -64,6 +64,11 @@ class Planet:
         unknown_paths = list(node.values())[0]
         if self.paths:
             # remove already known exits or node
+            print("--------------------")
+            print(self.paths)
+            print(key)
+            print(node)
+            print("--------------------")
             known_paths = self.paths[key]
             # remove paths which are already known
             unknown_paths = [

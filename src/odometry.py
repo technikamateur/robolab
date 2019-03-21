@@ -306,7 +306,7 @@ class Robot:
 		self.position = new_pos
 
 	def setView(self, direction):
-		self.view = direction
+		self.view = self.angle_to_direction(self.direction_to_angle(direction)+180, "deg")
 
 #  Suggestion: 	implement odometry as class that is not using the ev3dev.ev3 package
 # 				establish value exchange with main driving class via getters and setters
