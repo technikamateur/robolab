@@ -66,10 +66,10 @@ class Communication:
     def on_message(self, client, data, message):
         """ Handles the callback if any message arrived """
 
-        print('Got message with topic "{}":'.format(message.topic))
+        #print('Got message with topic "{}":'.format(message.topic))
         data = json.loads(message.payload.decode('utf-8'))
-        print(json.dumps(data, indent=2))
-        print("\n")
+        #print(json.dumps(data, indent=2))
+        #print("\n")
 
         self.data = data
         self.typ_Entsch()
@@ -91,10 +91,8 @@ class Communication:
         if self.data["from"] == "server" and self.data["type"] == "planet":
             self.setPlanetInfo()
         elif self.data["from"] == "server" and self.data["type"] == "path":
-            print("Ich bin bei path")
             self.set_korrePos()
         elif self.data["from"] == "server" and self.data["type"] == "pathUnveiled":
-            print("Ich bin bei geschenktem path")
             self.speich_path()
 
 
@@ -169,11 +167,6 @@ class Communication:
             self.shortestPath = planet.shortest_path((self.aktX, self.aktY), self.planet.getImpossibleTarget())
             if self.shortestPath is not None:
                 self.planet.resetImpossibleTarget()
-        print("---")
-        print("set_korre Koordinaten")
-        print(self.aktX)
-        print(self.aktY)
-        print("---")
         return [(endX, endY), endDir]
 
     def get_korre_pos(self):
@@ -195,11 +188,6 @@ class Communication:
             self.shortestPath = self.planet.shortest_path((endX, endY), self.planet.getImpossibleTarget())
             if self.shortestPath is not None:
                 self.planet.resetImpossibleTarget()
-        print("---")
-        print("speich Koordinaten")
-        print(self.aktX)
-        print(self.aktY)
-        print("---")
 
     def node_scanned(self):
         return self.planet.node_scanned((self.aktX, self.aktY))
@@ -214,8 +202,6 @@ class Communication:
             # check if there is a running path to a node to discover
             if self.exploringPath == None or not self.exploringPath:
                 # check where to get search for next target
-                print("WICHTIG")
-                print(self.planet.go_direction((self.aktX, self.aktY)))
                 if self.planet.go_direction((self.aktX, self.aktY)):
                     # search on current node
                     startDirPlanet = self.planet.get_direction((self.aktX, self.aktY))
@@ -256,9 +242,9 @@ class Communication:
         path_server = self.data["payload"]
         startDir = path_server["startDirection"]
 
-        self.direc = startDir
+        self.direc = Direction(startDir)
 
-        return Direction(starDir)
+        return Direction(startDir)
 
 
 

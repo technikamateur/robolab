@@ -58,23 +58,32 @@ class Planet:
             currentNode: [(Direction.NORTH, -2), (Direction.EAST, -3)]
         } Definition: -1 = blocked, -2 = pathAvailable, -3 = noPath
         """
-        self.scannedNodes.append(node)
-        print(node)
         key = list(node.keys())[0]
         unknown_paths = list(node.values())[0]
+        # filter list, remove -1 and -3 elements
+        unknown_paths = [x for x in unknown_paths if -1 not in x]
+        unknown_paths = [x for x in unknown_paths if -3 not in x]
+        new_unknown_paths = []
+        for element in unknown_paths:
+            new_unknown_paths.append(element[0])
+        unknown_paths = new_unknown_paths
+        self.scannedNodes.append(key)
         if self.paths:
             # remove already known exits or node
-            print("--------------------")
-            print(self.paths)
-            print(key)
-            print(node)
-            print("--------------------")
             known_paths = self.paths[key]
             # remove paths which are already known
-            unknown_paths = [
-                unknown for known in known_paths for unknown in unknown_paths
-                if known not in unknown
-            ]
+            if key == (15, 39):
+                print("SEHR WICHTIG")
+                print(unknown_paths)
+            new_known_paths = []
+            for known in known_paths:
+                new_known_paths.append(known)
+            unknown_paths = [item for item in unknown_paths if item not in new_known_paths]
+
+            print(unknown_paths)
+            if key == (15, 39):
+                print("SEHR WICHTIG")
+                print(unknown_paths)
             """ Funktion drüber soll das machen
             for direc in known_paths:
                 for unknown in unknown_paths:
@@ -84,21 +93,19 @@ class Planet:
                         pass
             """
         # remove blocked or not existing paths
-        print("ungefilterte Knoten")
-        print(unknown_paths)
         #or -3 not in x
-        unknown_paths = [x for x in unknown_paths if -1 not in x]
-        unknown_paths = [x for x in unknown_paths if -3 not in x]
-        print("Gefilterte Knoten")
-        print(unknown_paths)
+
         self.unknownPaths.update({key: unknown_paths})
         # return a random existing exit
-        return [key, random.choice(unknown_paths)[0]]
+        print("Current Unknown")
+        print(self.unknownPaths)
+        return [key, random.choice(unknown_paths)]
 
     # direction with unknown path for node
     def get_direction(self, node):
+        print(self.unknownPaths)
         value = self.unknownPaths[node]
-        return random.choice(value)[0]
+        return random.choice(value)
 
     # returns path to next node from node
     def get_next_node(self, node):
@@ -123,6 +130,7 @@ class Planet:
 
     # check whether node is already scanned
     def node_scanned(self, node):
+
         if node in self.scannedNodes:
             self.logger.info("Node already scanned.")
             return True
@@ -176,27 +184,6 @@ class Planet:
                     {target[0]: {
                          target[1]: (start[0], start[1], weight)
                      }})
-            # check the current start and target existence in
-            # unknownPaths and remove them
-            if start[0] in self.unknownPaths:
-                value = self.unknownPaths[start[0]]
-                for direc in value:
-                    if start[1] == direc[1]:
-                        self.logger.info("Path explored. Removing from unknown...")
-                        value.remove(direc)
-                        break
-            elif target[0] in self.unknownPaths:
-                value = self.unknownPaths[target[0]]
-                for direc in value:
-                    if target[1] == direc[1]:
-                        self.logger.info("Path explored. Removing from unknown...")
-                        value.remove(direc)
-                        break
-            # now, remove all empty keys
-            for node in list(self.unknownPaths.keys()):
-                if self.unknownPaths[node] == []:
-                    del self.unknownPaths[node]
-
         elif weight == -1:
             # if path is blocked
             # I can not remember path is blocked or not, after scanning node again
@@ -205,7 +192,27 @@ class Planet:
             pass
         else:
             self.logger.error("Path could not be added!")
-
+        # check the current start and target existence in
+        # unknownPaths and remove them
+        if start[0] in self.unknownPaths:
+            value = self.unknownPaths[start[0]]
+            for direc in value:
+                if start[1] == direc:
+                    self.logger.info("Path explored. Removing from unknown...")
+                    value.remove(direc)
+                    break
+        elif target[0] in self.unknownPaths:
+            value = self.unknownPaths[target[0]]
+            for direc in value:
+                if target[1] == direc:
+                    self.logger.info("Path explored. Removing from unknown...")
+                    value.remove(direc)
+                    break
+        # now, remove all empty keys
+        for node in list(self.unknownPaths.keys()):
+            if self.unknownPaths[node] == []:
+                del self.unknownPaths[node]
+                
         if self.impossibleTarget is not None:
             self.logger.error("There are unfound targets. Implement it now!")
         # Now unknown paths should be cleaned
