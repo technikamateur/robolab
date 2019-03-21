@@ -51,7 +51,8 @@ class Planet:
 # start[1]
 #d.update({key:value})
 
-    # adds unknown paths
+# adds unknown paths
+
     def add_unknown_paths(self, node):
         """node should look like:
         {
@@ -78,7 +79,9 @@ class Planet:
             new_known_paths = []
             for known in known_paths:
                 new_known_paths.append(known)
-            unknown_paths = [item for item in unknown_paths if item not in new_known_paths]
+            unknown_paths = [
+                item for item in unknown_paths if item not in new_known_paths
+            ]
 
             print(unknown_paths)
             if key == (15, 39):
@@ -160,59 +163,79 @@ class Planet:
         :param weight: Integer
         :return: void
         """
+        self.logger.warning("Added blocked Path")
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
-                self.paths[start[0]].update(
-                    {start[1]: (target[0], target[1], weight)})
+                self.paths[start[0]].update({
+                    start[1]: (target[0], target[1], weight)
+                })
 
             elif start[0] not in self.paths:
                 # add node to dict
-                self.paths.update(
-                    {start[0]: {
-                         start[1]: (target[0], target[1], weight)
-                     }})
+                self.paths.update({
+                    start[0]: {
+                        start[1]: (target[0], target[1], weight)
+                    }
+                })
 
             if target[0] in self.paths:
                 # node in dict
-                self.paths[target[0]].update(
-                    {target[1]: (start[0], start[1], weight)})
+                self.paths[target[0]].update({
+                    target[1]: (start[0], start[1], weight)
+                })
 
             elif target[0] not in self.paths:
                 # add node to dict
-                self.paths.update(
-                    {target[0]: {
-                         target[1]: (start[0], start[1], weight)
-                     }})
+                self.paths.update({
+                    target[0]: {
+                        target[1]: (start[0], start[1], weight)
+                    }
+                })
         elif weight == -1:
             # if path is blocked
             # I can not remember path is blocked or not, after scanning node again
             self.logger.warning("Path is blocked:")
-            self.logger.warning(start)
-            pass
+            if start[0] in self.paths:
+                # node in dict
+                self.paths[start[0]].update({
+                    start[1]: (target[0], target[1], weight)
+                })
+
+            elif start[0] not in self.paths:
+                # add node to dict
+                self.paths.update({
+                    start[0]: {
+                        start[1]: (target[0], target[1], weight)
+                    }
+                })
         else:
             self.logger.error("Path could not be added!")
         # check the current start and target existence in
         # unknownPaths and remove them
         if start[0] in self.unknownPaths:
             value = self.unknownPaths[start[0]]
-            for direc in value:
-                if start[1] == direc:
-                    self.logger.info("Path explored. Removing from unknown...")
-                    value.remove(direc)
-                    break
-        elif target[0] in self.unknownPaths:
+            new_value = [direc for direc in value if start[1]!=direc]
+            # for direc in value:
+            #     if start[1] != direc:
+            #         self.logger.info("Path explored. Removing from unknown...")
+            #         new_value.append(direc)
+            #         break
+            self.unknownPaths[start[0]] = new_value
+        elif target[0] in self.unknownPaths and weight == -1:
             value = self.unknownPaths[target[0]]
-            for direc in value:
-                if target[1] == direc:
-                    self.logger.info("Path explored. Removing from unknown...")
-                    value.remove(direc)
-                    break
+            new_value = [direc for direc in value if target[1]!=direc]
+            # for direc in value:
+            #     if target[1] != direc:
+            #         self.logger.info("Path explored. Removing from unknown...")
+            #         new_value.append(direc)
+            #         break
+            self.unknownPaths[target[0]] = new_value
         # now, remove all empty keys
         for node in list(self.unknownPaths.keys()):
             if self.unknownPaths[node] == []:
                 del self.unknownPaths[node]
-                
+
         if self.impossibleTarget is not None:
             self.logger.error("There are unfound targets. Implement it now!")
         # Now unknown paths should be cleaned
@@ -263,8 +286,9 @@ class Planet:
         graphList = []
         for key, value in self.paths.items():
             for targets in value.values():
-                edge = [key, targets[0], targets[2]]
-                graphList.append(edge)
+                if targets[2] > 0:
+                    edge = [key, targets[0], targets[2]]
+                    graphList.append(edge)
         self.graph = SimpleGraph(graphList, start, target)
         self.logger.info("...done.")
 
