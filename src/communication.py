@@ -7,7 +7,7 @@ import time
 from planet import Direction
 
 
-
+# test
 class Communication:
     """
         Class to hold the MQTT client
@@ -111,16 +111,18 @@ class Communication:
     # 1.Erkundung nach der Landung.
     def send_ready(self):
         erk = '{"from": "client", "type": "ready"}'
+        mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Hawkeye"}}'
         self.client.publish("explorer/118", erk, qos=1)
+        self.client.publish("explorer/118", mess, qos=1)
 
     # 2.PlanetName und StartKoordinanten übergeben
     def setPlanetInfo(self):
-        playload = self.data["playload"]
-        planetName = playload["planetName"]
-        self.planet_Chan = 'planet/'+planetName+''+str(-118)+'
+        payload = self.data["payload"]
+        planetName = payload["planetName"]
+        self.planet_Chan = 'planet/'+planetName+'-118'
         self.client.subscribe(self.planet_Chan, qos=1)
-        self.aktX = int(self.data["startX"])
-        self.aktY = int(self.data["startY"])
+        self.aktX = int(payload["startX"])
+        self.aktY = int(payload["startY"])
 
         #return (self.aktX, self.aktY)
 
@@ -159,10 +161,10 @@ class Communication:
         self.aktY = endY
 
         self.planet.add_path(((startX, startY), startDir), ((endX, endY), endDir), weight)
-            if planet.getImpossibleTarget() is not None:
-                self.shortestPath = planet.shortest_path((self.aktX, self.aktY), planet.getImpossibleTarget())
-                if self.shortestPath is not None:
-                    planet.resetImpossibleTarget()
+        if planet.getImpossibleTarget() is not None:
+            self.shortestPath = planet.shortest_path((self.aktX, self.aktY), planet.getImpossibleTarget())
+            if self.shortestPath is not None:
+                planet.resetImpossibleTarget()
 
         return [(endX, endY), endDir]
 
@@ -199,35 +201,30 @@ class Communication:
                 # check where to get search for next target
                 if self.planet.go_direction((self.aktX, self.aktY)):
                     # search on current node
-                    return self.planet.get_direction((self.aktX, self.aktY))
+                    startDirPlanet = self.planet.get_direction((self.aktX, self.aktY))
                 else:
                     # go to a node
                     self.exploringPath = self.planet.get_next_node((self.aktX, self.aktY))
                     if self.exploringPath == None:
                         self.explor_compl()
                     else:
-                        return self.exploringPath.pop(0)[1]
+                        startDirPlanet = self.exploringPath.pop(0)[1]
             else:
-                return self.exploringPath.pop(0)[1]
-            """
-            self.shortestPath = None
-            result = self.planet.unknown_paths((self.aktX, self.aktY))
-            startX = result[0][0]
-            startY = result[0][1]
-            startDir = result[1].value
-
-            self.aktX = startX
-            self.aktY = startY
-            self.direc = startDir
-            """
-            select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(startX)+', "startY": '+str(startY)+', "startDirection": "'+startDir+'"} }'
-
-            self.client.publish(self.planet_Chan, select, qos=1)
-            self.timer()
-            return self.direc
-
+                startDirPlanet = self.exploringPath.pop(0)[1]
         else:
-            return self.shortestPath.pop(0)[1]
+            startDirPlanet = self.shortestPath.pop(0)[1]
+
+        select = '{"from":"client", "type":"pathSelect", "payload": {"startX": '+str(self.aktX)+', "startY": '+str(self.aktY)+', "startDirection": "'+startDirPlanet+'"} }'
+
+        self.client.publish(self.planet_Chan, select, qos=1)
+        self.timer()
+        if self.direc is None:
+            return startDirPlanet
+        else:
+            returnState = self.direc
+            self.direc = None
+            return returnState
+
 
 
 
@@ -245,7 +242,7 @@ class Communication:
 
     # 7. Zielpossition aus Mutterschiff:
     def target_server(self):
-        target = self.data["playload"]
+        target = self.data["payload"]
         targetX = int(target["targetX"])
         targetY = int(target["targetY"])
         self.target = (targetX, targetY)
@@ -270,5 +267,5 @@ class Communication:
 
     # 10. Done from Server:
     def done(self):
-        done = self.data("playload")
+        done = self.data("payload")
         print(done("message"))

@@ -10,6 +10,7 @@ from odometry import Robot
 client = None  # DO NOT EDIT
 
 
+# test
 def run():
     # DO NOT EDIT
     # the deploy script uses this variable to stop the mqtt client after your program stops or crashes.
@@ -25,9 +26,9 @@ def run():
     bob.drive()
     planet = Planet()
     com = Communication(client, planet)
-    com.timer()
     bob.setView = Direction.NORTH
-    bob.setPosition = com.getStartP()
+    com.timer()
+    bob.setPosition = com.get_startP()
     if com.node_scanned():
         com.scan_result(bob.scanPoint(Direction.SOUTH))
     bob.turn_by_direction(com.where_to_go())
@@ -44,7 +45,7 @@ def run():
             break
         bob.turn_by_direction(direction)
         bob.drive()
-        
+
     """print("Hello World!")
     bob = Robot()
     planet = Planet()
