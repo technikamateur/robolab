@@ -60,12 +60,14 @@ class Robot:
 				self.ml.stop()
 				break
 			if self.ts.value() == 1:			#Touchsensor is pressed
-				playSound_zeldaSecret():
 				self.mr.speed_sp = - 100
 				self.ml.speed_sp = - 100
 				self.mr.command = "run-forever"
 				self.ml.command = "run-forever"
 				time.sleep(1.1)
+				self.mr.stop()
+				self.ml.stop()
+				playSound_zeldaSecret()
 				self.status = "blocked"
 				self.turn_by_degree(180,100)
 				self.findLine(150,40, 35)
