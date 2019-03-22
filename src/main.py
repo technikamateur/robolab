@@ -28,7 +28,7 @@ def run():
 	planet = Planet()
 	com = Communication(client, planet)
 	bob.setView(Direction.SOUTH)
-	#com.timer()
+	com.timer()
 	bob.setPosition(com.get_startP())
 	if not com.node_scanned():
 		com.scan_result(bob.scanPoint(Direction.SOUTH))
