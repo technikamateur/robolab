@@ -125,7 +125,7 @@ class Planet:
 
                 elif key not in graphList:
                     # add node to dict
-                    graphList.update({key: targets[0]})
+                    graphList.update({key: [targets[0]]})
         graph = SearchableGraph(graphList, node, self.unknownPaths.keys())
         target = graph.find_next_node()
         self.logger.info("Found new target node.")
