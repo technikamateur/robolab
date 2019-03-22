@@ -6,10 +6,8 @@ import math
 from planet import Direction
 
 def playSound_weAreNumberOne():
-	Sound.tone([(698.46,450,10),(1046.5,150,0),(987.77,150,0),(1046.5,150,0),(987.77,150,0),(1046.5,150,0),(987.77,150,0),(1046.5,150,0)]).wait()
-	Sound.tone([(830.61,300,0),(698.46,450,150),(698.46,150,0),(830.61,150,0),(1046.5,150,0),(1108.73,300,0),(830.61,300,0),(1108.73,300,0),(1244.51,300,0)]).wait()
-	Sound.tone([(1046.5,150,0),(1108.73,150,0),(1046.5,150,0),(1108.73,150,0),(1046.5,300,0),(2093,150,0)]).wait()
-
+	Sound.tone([(698.46,450,0),(1046.5,150,0),(987.77,150,0),(1046.5,150,0),(987.77,150,0),(1046.5,150,0),(987.77,150,0),(1046.5,150,0),(830.61,300,0),(698.46,450,150),(698.46,150,0),(830.61,150,0),(1046.5,150,0),(1108.73,300,0),(830.61,300,0),(1108.73,300,0),(1244.51,300,0),(1046.5,150,0),(1108.73,150,0),(1046.5,150,0),(1108.73,150,0),(1046.5,300,0),(2093,150,0)]).wait()
+	
 def playSound_zeldaSecret():
 	Sound.tone([(783.99,150,0),(739.99,150,0),(622.25,150,0),(440,150,0),(415.3,150,0),(659.25,150,0),(830.61,150,0),(1046.5,150,0)]).wait()
 
@@ -49,12 +47,10 @@ class Robot:
 		while True:						#Feedback-Loop
 			start = time.time()
 			colorsum = self.mesureBrightness()
-			#print(colorsum)
 			error = (gray - colorsum)/gray			#Proportional-factor
 			integral += error
 			derivative = error - lastError
 			turn = kp * error + ki * integral + kd * derivative
-			#print (ki * integral)
 			if self.mesureColor() is "red":	#Colormesurement to find connection points
 				self.mr.stop()
 				self.ml.stop()
@@ -64,6 +60,7 @@ class Robot:
 				self.ml.stop()
 				break
 			if self.ts.value() == 1:			#Touchsensor is pressed
+				playSound_zeldaSecret():
 				self.mr.speed_sp = - 100
 				self.ml.speed_sp = - 100
 				self.mr.command = "run-forever"
@@ -85,9 +82,9 @@ class Robot:
 					kp = 0.8
 				if turn<0:
 					self.mr.speed_sp = bs+bs*turn
-					self.ml.speed_sp = bs#-bs*turn
+					self.ml.speed_sp = bs
 				else:
-					self.mr.speed_sp = bs#+bs*turn
+					self.mr.speed_sp = bs
 					self.ml.speed_sp = bs-bs*turn
 				self.mr.command = "run-forever"
 				self.ml.command = "run-forever"

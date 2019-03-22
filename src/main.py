@@ -23,8 +23,6 @@ def run():
 
 	# the execution of all code shall be started from within this function
 	# ADD YOUR OWN IMPLEMENTATION HEREAFTER
-	playSound_weAreNumberOne()
-	playSound_zeldaSecret()
 	bob = Robot()
 	bob.drive()
 	planet = Planet()
@@ -46,6 +44,7 @@ def run():
 			com.scan_result(bob.scanPoint())
 		direction = com.where_to_go()
 		if direction is None:
+			playSound_weAreNumberOne()
 			break
 		bob.turn_by_direction(direction)
 		bob.drive()
