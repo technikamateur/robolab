@@ -66,10 +66,10 @@ class Communication:
     def on_message(self, client, data, message):
         """ Handles the callback if any message arrived """
 
-        #print('Got message with topic "{}":'.format(message.topic))
+        print('Got message with topic "{}":'.format(message.topic))
         data = json.loads(message.payload.decode('utf-8'))
-        #print(json.dumps(data, indent=2))
-        #print("\n")
+        print(json.dumps(data, indent=2))
+        print("\n")
 
         self.data = data
         self.typ_Entsch()
@@ -115,6 +115,7 @@ class Communication:
         self.client.publish("explorer/118", erk, qos=1)
         self.timer()
         self.client.publish("explorer/118", mess, qos=1)
+        self.timer()
 
     # 2.PlanetName und StartKoordinanten übergeben
     def setPlanetInfo(self):
@@ -275,5 +276,5 @@ class Communication:
 
     # 10. Done from Server:
     def done(self):
-        done = self.data("payload")
+        done = self.data["payload"]
         print(done("message"))

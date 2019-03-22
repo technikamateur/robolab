@@ -7,7 +7,7 @@ from planet import Direction
 
 def playSound_weAreNumberOne():
 	Sound.tone([(698.46,450,0),(1046.5,150,0),(987.77,150,0),(1046.5,150,0),(987.77,150,0),(1046.5,150,0),(987.77,150,0),(1046.5,150,0),(830.61,300,0),(698.46,450,150),(698.46,150,0),(830.61,150,0),(1046.5,150,0),(1108.73,300,0),(830.61,300,0),(1108.73,300,0),(1244.51,300,0),(1046.5,150,0),(1108.73,150,0),(1046.5,150,0),(1108.73,150,0),(1046.5,300,0),(2093,150,0)]).wait()
-	
+
 def playSound_zeldaSecret():
 	Sound.tone([(783.99,150,0),(739.99,150,0),(622.25,150,0),(440,150,0),(415.3,150,0),(659.25,150,0),(830.61,150,0),(1046.5,150,0)]).wait()
 
@@ -92,7 +92,6 @@ class Robot:
 				self.ml.command = "run-forever"
 				time.sleep(0.1)
 				end = time.time()
-				#print (end-start)
 				self.speedListR.append(self.mr.speed)
 				self.speedListL.append(self.ml.speed)
 				self.timeList.append(end-start)
@@ -174,7 +173,6 @@ class Robot:
 
 		while timecount < timestamp:
 			colorsum = self.mesureBrightness()
-			#print("Turn left",colorsum)
 			if(colorsum < b):
 				self.mr.stop()
 				self.ml.stop()
@@ -188,7 +186,6 @@ class Robot:
 			time.sleep(0.05)
 		while timecount > -timestamp:
 			colorsum =self.cs.bin_data("hhh")[0] + self.cs.bin_data("hhh")[1] + self.cs.bin_data("hhh")[2]
-			#print("Turn right",colorsum)
 			if(colorsum < b):
 				self.mr.stop()
 				self.ml.stop()
@@ -243,7 +240,6 @@ class Robot:
 		xn = self.oldposition[0] + round(dx)
 		yn = self.oldposition[1] + round(dy)
 		self.position = (xn,yn)
-		print (self.position)
 
 	def angle_to_direction(self, angle, deg = "rad"):
 		if deg is "rad":

@@ -73,14 +73,11 @@ class Planet:
         new_unknown_paths = []
         for element in unknown_paths:
             new_unknown_paths.append(element[0])
-        unknown_paths = new_unknown_paths
         self.scannedNodes.append(key)
-        self.unknownPaths.update({key: unknown_paths})
-        #return [key, random.choice(unknown_paths)]
+        self.unknownPaths.update({key: new_unknown_paths})
 
     # direction with unknown path for node
     def get_direction(self, node):
-        print(self.unknownPaths)
         value = self.unknownPaths[node]
         return random.choice(value)
 
@@ -102,12 +99,15 @@ class Planet:
                     graphList.update({key: [targets[0]]})
         graph = SearchableGraph(graphList, node, self.unknownPaths.keys())
         target = graph.find_next_node()
-        self.logger.info("Found new target node.")
+        self.logger.info("Found new target node:")
+        self.logger.info(target)
         return self.shortest_path(node, target)
 
     # check whether node is already scanned
     def node_scanned(self, node):
-
+        print("scanned nodes")
+        print(node)
+        print(self.scannedNodes)
         if node in self.scannedNodes:
             self.logger.info("Node already scanned.")
             return True
@@ -119,10 +119,12 @@ class Planet:
     def go_direction(self, node):
         self.clean_unknown_paths()
         if node in self.unknownPaths:
+            self.logger.info("Dicover Direction on current Node")
             return True
-        elif not self.paths:
-            return True
+        # elif not self.paths:
+        #     return True
         else:
+            self.logger.info("Got to other node")
             return False
 
     # adds path to dict
@@ -138,7 +140,7 @@ class Planet:
         :param weight: Integer
         :return: void
         """
-        self.logger.warning("Added blocked Path")
+        self.logger.warning("new path added")
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
@@ -274,6 +276,8 @@ class Planet:
                         else:
                             pass
                 shortestPath.reverse()
+                self.logger.info("Shortest Path:")
+                self.logger.info(shortestPath)
                 return shortestPath
             else:
                 self.logger.warning("Target not reachable")

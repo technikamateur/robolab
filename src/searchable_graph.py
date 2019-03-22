@@ -15,7 +15,7 @@ class SearchableGraph:
 
     def find_next_node(self):
         queue = [[self.node]]
-        foundNode = False
+        foundNode = True
         level = 1
         nextNodeElement = 0
         while foundNode:
@@ -24,7 +24,10 @@ class SearchableGraph:
                 nextNodeElement += 1
                 level += 1
             # set next node
-            nextNode = queue[nextNodeElement].pop()
+            try:
+                nextNode = queue[nextNodeElement].pop()
+            except:
+                return None
             # get nodes from this node
             value = self.graph[nextNode]
             try:
