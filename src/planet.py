@@ -39,6 +39,12 @@ class Planet:
         """ Initializes the data structure """
         self.paths = {}
         self.unknownPaths = {}
+        """
+        self.unknownPaths looks like
+        {
+            (0, 0): [Direction.NORTH, Direction.SOUTH, ...]
+        }
+        """
         self.scannedNodes = []
         self.graph = None
         self.impossibleTarget = None
@@ -69,49 +75,44 @@ class Planet:
             new_unknown_paths.append(element[0])
         unknown_paths = new_unknown_paths
         self.scannedNodes.append(key)
-        if self.paths:
-            # remove already known exits or node
-            known_paths = self.paths[key]
-            # remove paths which are already known
-            if key == (15, 39):
-                print("SEHR WICHTIG")
-                print(unknown_paths)
-            new_known_paths = []
-            for known in known_paths:
-                new_known_paths.append(known)
-            unknown_paths = [
-                item for item in unknown_paths if item not in new_known_paths
-            ]
-
-            print(unknown_paths)
-            if key == (15, 39):
-                print("SEHR WICHTIG")
-                print(unknown_paths)
-            """ Funktion drüber soll das machen
-            for direc in known_paths:
-                for unknown in unknown_paths:
-                    if direc not in element:
-                        real_unknown_paths.append(unknown)
-                    else:
-                        pass
-            """
+        # if self.paths:
+        #     # remove already known exits or node
+        #     known_paths = self.paths[key]
+        #     # remove paths which are already known
+        #     new_known_paths = []
+        #     for known in known_paths:
+        #         new_known_paths.append(known)
+        #     unknown_paths = [
+        #         item for item in unknown_paths if item not in new_known_paths
+        #     ]
+        #     """ Funktion drüber soll das machen
+        #     for direc in known_paths:
+        #         for unknown in unknown_paths:
+        #             if direc not in element:
+        #                 real_unknown_paths.append(unknown)
+        #             else:
+        #                 pass
+        #     """
         # remove blocked or not existing paths
         #or -3 not in x
 
         self.unknownPaths.update({key: unknown_paths})
         # return a random existing exit
-        print("Current Unknown")
-        print(self.unknownPaths)
-        return [key, random.choice(unknown_paths)]
+        #self.clean_unknown_paths()
+        #print("Current Unknown")
+        #print(self.unknownPaths)
+        #return [key, random.choice(unknown_paths)]
 
     # direction with unknown path for node
     def get_direction(self, node):
+        self.clean_unknown_paths()
         print(self.unknownPaths)
         value = self.unknownPaths[node]
         return random.choice(value)
 
     # returns path to next node from node
     def get_next_node(self, node):
+        self.clean_unknown_paths()
         # maybe there are no paths to discover
         if not self.unknownPaths:
             return None
@@ -213,32 +214,44 @@ class Planet:
             self.logger.error("Path could not be added!")
         # check the current start and target existence in
         # unknownPaths and remove them
-        if start[0] in self.unknownPaths:
-            value = self.unknownPaths[start[0]]
-            new_value = [direc for direc in value if start[1]!=direc]
-            # for direc in value:
-            #     if start[1] != direc:
-            #         self.logger.info("Path explored. Removing from unknown...")
-            #         new_value.append(direc)
-            #         break
-            self.unknownPaths[start[0]] = new_value
-        elif target[0] in self.unknownPaths:
-            value = self.unknownPaths[target[0]]
-            new_value = [direc for direc in value if target[1]!=direc]
-            # for direc in value:
-            #     if target[1] != direc:
-            #         self.logger.info("Path explored. Removing from unknown...")
-            #         new_value.append(direc)
-            #         break
-            self.unknownPaths[target[0]] = new_value
-        # now, remove all empty keys
-        for node in list(self.unknownPaths.keys()):
-            if self.unknownPaths[node] == []:
-                del self.unknownPaths[node]
+        # if start[0] in self.unknownPaths:
+        #     value = self.unknownPaths[start[0]]
+        #     new_value = [direc for direc in value if start[1]!=direc]
+        #     # for direc in value:
+        #     #     if start[1] != direc:
+        #     #         self.logger.info("Path explored. Removing from unknown...")
+        #     #         new_value.append(direc)
+        #     #         break
+        #     self.unknownPaths[start[0]] = new_value
+        # elif target[0] in self.unknownPaths:
+        #     value = self.unknownPaths[target[0]]
+        #     new_value = [direc for direc in value if target[1]!=direc]
+        #     # for direc in value:
+        #     #     if target[1] != direc:
+        #     #         self.logger.info("Path explored. Removing from unknown...")
+        #     #         new_value.append(direc)
+        #     #         break
+        #     self.unknownPaths[target[0]] = new_value
+        # # now, remove all empty keys
+        # for node in list(self.unknownPaths.keys()):
+        #     if self.unknownPaths[node] == []:
+        #         del self.unknownPaths[node]
 
         if self.impossibleTarget is not None:
             self.logger.error("There are unfound targets. Implement it now!")
         # Now unknown paths should be cleaned
+
+    def clean_unknown_paths(self):
+        if self.paths:
+            for known_key, known_value in self.paths:
+                known_directions = known_value.keys()
+                if known_key in self.unknownPaths:
+                    unknown_directions = self.unknownPaths[known_key]
+                    new_unknown_paths = [item for item in unknown_directions if item not in known_directions]
+                    if not new_unknown_paths:
+                        self.unknownPaths.pop(known_key, None)
+                    else:
+                        self.unknownPaths[known_key] = new_unknown_paths
 
     # returns all paths
     def get_paths(
