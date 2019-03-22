@@ -222,7 +222,7 @@ class Planet:
             #         new_value.append(direc)
             #         break
             self.unknownPaths[start[0]] = new_value
-        elif target[0] in self.unknownPaths and weight == -1:
+        elif target[0] in self.unknownPaths:
             value = self.unknownPaths[target[0]]
             new_value = [direc for direc in value if target[1]!=direc]
             # for direc in value:
