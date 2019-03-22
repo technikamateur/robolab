@@ -77,7 +77,7 @@ class Communication:
     def timer(self):
         print("Timer startet")
         t0 = time.time()
-        while (time.time() - t0) < 2:
+        while (time.time() - t0) < 3:
             pass
         print("Timer fertig")
 
