@@ -19,6 +19,8 @@ class SearchableGraph:
         level = 1
         nextNodeElement = 0
         while foundNode:
+            print(queue)
+            print(level)
             # check available paths in level
             if not queue[nextNodeElement]:
                 nextNodeElement += 1

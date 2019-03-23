@@ -90,11 +90,11 @@ class Planet:
         graphList = {}
         for key, value in self.paths.items():
             for targets in value.values():
-                if key in graphList:
+                if key in graphList and targets[2] > 0:
                     # node in dict
                     graphList[key].append(targets[0])
 
-                elif key not in graphList:
+                elif key not in graphList and targets[2] > 0:
                     # add node to dict
                     graphList.update({key: [targets[0]]})
         graph = SearchableGraph(graphList, node, self.unknownPaths.keys())
