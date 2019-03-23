@@ -7,7 +7,6 @@ import time
 from planet import Direction
 
 
-# test
 class Communication:
     """
         Class to hold the MQTT client
@@ -75,11 +74,9 @@ class Communication:
 
     #Timer: jede 2 Sekunden warten:
     def timer(self):
-        print("Timer startet")
         t0 = time.time()
         while (time.time() - t0) < 3:
             pass
-        print("Timer fertig")
 
     def typ_Entsch(self):
         if self.data["from"] == "server" and self.data["type"] == "planet":
