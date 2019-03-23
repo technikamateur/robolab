@@ -147,47 +147,41 @@ class Planet:
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
-                self.paths[start[0]].update({
-                    start[1]: (target[0], target[1], weight)
-                })
+                self.paths[start[0]].update(
+                    {start[1]: (target[0], target[1], weight)})
 
             elif start[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    start[0]: {
-                        start[1]: (target[0], target[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {start[0]: {
+                         start[1]: (target[0], target[1], weight)
+                     }})
 
             if target[0] in self.paths:
                 # node in dict
-                self.paths[target[0]].update({
-                    target[1]: (start[0], start[1], weight)
-                })
+                self.paths[target[0]].update(
+                    {target[1]: (start[0], start[1], weight)})
 
             elif target[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    target[0]: {
-                        target[1]: (start[0], start[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {target[0]: {
+                         target[1]: (start[0], start[1], weight)
+                     }})
         elif weight == -1:
             # if path is blocked
             # I can not remember path is blocked or not, after scanning node again
             if start[0] in self.paths:
                 # node in dict
-                self.paths[start[0]].update({
-                    start[1]: (target[0], target[1], weight)
-                })
+                self.paths[start[0]].update(
+                    {start[1]: (target[0], target[1], weight)})
 
             elif start[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    start[0]: {
-                        start[1]: (target[0], target[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {start[0]: {
+                         start[1]: (target[0], target[1], weight)
+                     }})
         else:
             self.logger.error("Path could not be added!")
 
@@ -201,7 +195,10 @@ class Planet:
                 known_directions = known_value.keys()
                 if known_key in self.unknownPaths:
                     unknown_directions = self.unknownPaths[known_key]
-                    new_unknown_paths = [item for item in unknown_directions if item not in known_directions]
+                    new_unknown_paths = [
+                        item for item in unknown_directions
+                        if item not in known_directions
+                    ]
                     if not new_unknown_paths:
                         self.unknownPaths.pop(known_key, None)
                     else:

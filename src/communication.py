@@ -161,7 +161,7 @@ class Communication:
         self.planet.add_path(((startX, startY), startDir),
                              ((endX, endY), endDir), weight)
         if self.planet.getImpossibleTarget() is not None:
-            self.shortestPath = planet.shortest_path(
+            self.shortestPath = self.planet.shortest_path(
                 (self.aktX, self.aktY), self.planet.getImpossibleTarget())
             if self.shortestPath is not None:
                 self.planet.resetImpossibleTarget()
@@ -198,9 +198,9 @@ class Communication:
     # 5. pathSelect Publish on planet:
     def where_to_go(self):
         # check if shortest path is running
-        if self.shortestPath == None or not self.shortestPath:
+        if self.shortestPath is None or not self.shortestPath:
             # check if there is a running path to a node to discover
-            if self.exploringPath == None or not self.exploringPath:
+            if self.exploringPath is None or not self.exploringPath:
                 # check where to get search for next target
                 if self.planet.go_direction((self.aktX, self.aktY)):
                     # search on current node
@@ -210,8 +210,9 @@ class Communication:
                     # go to a node
                     self.exploringPath = self.planet.get_next_node((self.aktX,
                                                                     self.aktY))
-                    if self.exploringPath == None:
+                    if self.exploringPath is None:
                         self.explor_compl()
+                        startDirPlanet = None
                     else:
                         startDirPlanet = self.exploringPath.pop(0)[1]
             else:
