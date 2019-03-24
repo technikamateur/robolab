@@ -38,10 +38,11 @@ class SimpleGraph:
             if edge[0] == self.target:
                 containsTarget = True
         if containsStart and containsTarget:
-            self.logger.info("Path possible")
+            self.logger.info("Start and target are an element of planet")
             return True
         else:
-            self.logger.info("Path impossible")
+            self.logger.warning(
+                "Start and target are NOT an element of planet")
             return False
 
     def dijkstra(self):
@@ -85,6 +86,7 @@ class SimpleGraph:
         shortestPath = shortestPathFormatter(shortestPath)
         return shortestPath
 
+
 def listCleaning(paths):
     newPath = OrderedDict()
     for edge in paths:
@@ -101,6 +103,7 @@ def listCleaning(paths):
     for key, value in newPath.items():
         newPathList.append([key[0], key[1], value])
     return newPathList
+
 
 def shortestPathFormatter(path):
     # reverse list

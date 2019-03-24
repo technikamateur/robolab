@@ -85,29 +85,32 @@ class Planet:
     def get_next_node(self, node):
         # maybe there are no paths to discover
         if not self.unknownPaths:
+            self.logger.info("Everything discovered. Finishing exploration.")
             return None
         self.logger.info("Performing graph creation...")
         graphList = {}
         for key, value in self.paths.items():
             for targets in value.values():
-                if key in graphList:
+                if key in graphList and targets[2] > 0:
                     # node in dict
                     graphList[key].append(targets[0])
 
-                elif key not in graphList:
+                elif key not in graphList and targets[2] > 0:
                     # add node to dict
                     graphList.update({key: [targets[0]]})
         graph = SearchableGraph(graphList, node, self.unknownPaths.keys())
+        self.logger.info("...done")
         target = graph.find_next_node()
-        self.logger.info("Found new target node:")
-        self.logger.info(target)
-        return self.shortest_path(node, target)
+        if target is not None:
+            self.logger.info("Found new target node:")
+            self.logger.info(target)
+            return self.shortest_path(node, target)
+        else:
+            self.logger.warning("Function did not exit properly.")
+            return None
 
     # check whether node is already scanned
     def node_scanned(self, node):
-        print("scanned nodes")
-        print(node)
-        print(self.scannedNodes)
         if node in self.scannedNodes:
             self.logger.info("Node already scanned.")
             return True
@@ -124,7 +127,7 @@ class Planet:
         # elif not self.paths:
         #     return True
         else:
-            self.logger.info("Got to other node")
+            self.logger.info("Go to other node")
             return False
 
     # adds path to dict
@@ -140,52 +143,45 @@ class Planet:
         :param weight: Integer
         :return: void
         """
-        self.logger.warning("new path added")
+        self.logger.info("new path added")
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
-                self.paths[start[0]].update({
-                    start[1]: (target[0], target[1], weight)
-                })
+                self.paths[start[0]].update(
+                    {start[1]: (target[0], target[1], weight)})
 
             elif start[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    start[0]: {
-                        start[1]: (target[0], target[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {start[0]: {
+                         start[1]: (target[0], target[1], weight)
+                     }})
 
             if target[0] in self.paths:
                 # node in dict
-                self.paths[target[0]].update({
-                    target[1]: (start[0], start[1], weight)
-                })
+                self.paths[target[0]].update(
+                    {target[1]: (start[0], start[1], weight)})
 
             elif target[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    target[0]: {
-                        target[1]: (start[0], start[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {target[0]: {
+                         target[1]: (start[0], start[1], weight)
+                     }})
         elif weight == -1:
             # if path is blocked
             # I can not remember path is blocked or not, after scanning node again
-            self.logger.warning("Path is blocked:")
             if start[0] in self.paths:
                 # node in dict
-                self.paths[start[0]].update({
-                    start[1]: (target[0], target[1], weight)
-                })
+                self.paths[start[0]].update(
+                    {start[1]: (target[0], target[1], weight)})
 
             elif start[0] not in self.paths:
                 # add node to dict
-                self.paths.update({
-                    start[0]: {
-                        start[1]: (target[0], target[1], weight)
-                    }
-                })
+                self.paths.update(
+                    {start[0]: {
+                         start[1]: (target[0], target[1], weight)
+                     }})
         else:
             self.logger.error("Path could not be added!")
 
@@ -199,7 +195,10 @@ class Planet:
                 known_directions = known_value.keys()
                 if known_key in self.unknownPaths:
                     unknown_directions = self.unknownPaths[known_key]
-                    new_unknown_paths = [item for item in unknown_directions if item not in known_directions]
+                    new_unknown_paths = [
+                        item for item in unknown_directions
+                        if item not in known_directions
+                    ]
                     if not new_unknown_paths:
                         self.unknownPaths.pop(known_key, None)
                     else:
@@ -259,14 +258,12 @@ class Planet:
 
         if self.graph.pathPossible():
             self.logger.info("Path valid - returning shortest path now.")
-            self.graph.printAll()
+            #self.graph.printAll()
             # get the path and add directions
             shortestPath = []
             pathExDirection = self.graph.dijkstra()
             if pathExDirection is not None:
-                print(pathExDirection)
                 pathExDirection.reverse()
-                print(pathExDirection)
                 for edge in pathExDirection:
                     valueDict = self.paths[edge[0]]
                     for keys, values in valueDict.items():
@@ -280,7 +277,7 @@ class Planet:
                 self.logger.info(shortestPath)
                 return shortestPath
             else:
-                self.logger.warning("Target not reachable")
+                self.logger.warning("Target (currently) not reachable")
                 return None
         else:
             self.logger.warning("Path invalid - saving this")
