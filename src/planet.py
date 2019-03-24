@@ -257,7 +257,6 @@ class Planet:
         self.logger.info("...done.")
 
         if self.graph.pathPossible():
-            self.logger.info("Path valid - returning shortest path now.")
             #self.graph.printAll()
             # get the path and add directions
             shortestPath = []
