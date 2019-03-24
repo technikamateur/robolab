@@ -5,6 +5,7 @@ import json
 import paho.mqtt.client as mqtt
 import time
 from planet import Direction
+import logging
 
 
 class Communication:
@@ -46,6 +47,10 @@ class Communication:
         self.exploringPath = None
         self.ourDirec = None
         self.target = None
+        # store, that we are on se way
+        self.running_target = None
+        self.logger = logging.getLogger('Com')
+        logging.basicConfig(level=logging.DEBUG)
 
     # this is a helper method that catches errors and prints them
     # it is necessary because on_message is called by paho-mqtt in a different thread and exceptions
@@ -160,11 +165,11 @@ class Communication:
 
         self.planet.add_path(((startX, startY), startDir),
                              ((endX, endY), endDir), weight)
-        if self.planet.getImpossibleTarget() is not None:
-            self.shortestPath = self.planet.shortest_path(
-                (self.aktX, self.aktY), self.planet.getImpossibleTarget())
-            if self.shortestPath is not None:
-                self.planet.resetImpossibleTarget()
+        # if self.planet.getImpossibleTarget() is not None:
+        #     self.shortestPath = self.planet.shortest_path(
+        #         (self.aktX, self.aktY), self.planet.getImpossibleTarget())
+        #     if self.shortestPath is not None:
+        #         self.planet.resetImpossibleTarget()
         return [(endX, endY), endDir]
 
     def get_korre_pos(self):
@@ -183,11 +188,11 @@ class Communication:
 
         self.planet.add_path(((startX, startY), startDir),
                              ((endX, endY), endDir), weight)
-        if self.planet.getImpossibleTarget() is not None:
-            self.shortestPath = self.planet.shortest_path(
-                (endX, endY), self.planet.getImpossibleTarget())
-            if self.shortestPath is not None:
-                self.planet.resetImpossibleTarget()
+        # if self.planet.getImpossibleTarget() is not None:
+        #     self.shortestPath = self.planet.shortest_path(
+        #         (endX, endY), self.planet.getImpossibleTarget())
+        #     if self.shortestPath is not None:
+        #         self.planet.resetImpossibleTarget()
 
     def node_scanned(self):
         return self.planet.node_scanned((self.aktX, self.aktY))
@@ -197,6 +202,23 @@ class Communication:
 
     # 5. pathSelect Publish on planet:
     def where_to_go(self):
+        # we have reached target
+        if self.target == (self.aktX, self.aktY) or self.running_target == (self.aktX, self.aktY):
+            self.running_target = None
+            self.target = None
+            self.target_Reached()
+        # We have started running to target
+        # but we have been interrupted
+        if self.running_target is not None:
+            self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY), self.target)
+        # check existence of target and reachability
+        if self.target is not None:
+            check_path_possible = self.planet.shortest_path((self.aktX, self.aktY), self.target)
+            if check_path_possible is not None:
+                self.shortestPath = check_path_possible
+                self.running_target = self.target
+                self.target = None
+                self.exploringPath = None
         # check if shortest path is running
         if self.shortestPath is None or not self.shortestPath:
             # check if there is a running path to a node to discover
@@ -219,8 +241,8 @@ class Communication:
                 startDirPlanet = self.exploringPath.pop(0)[1]
         else:
             startDirPlanet = self.shortestPath.pop(0)[1]
-        print("Daniels Rihtung:")
-        print(startDirPlanet)
+        self.logger.info("Our suggestion:")
+        self.logger.info(startDirPlanet)
         # send suggestion to mothership
         # but only if we have a direction (maybe explo is completed)
         if startDirPlanet is not None:
@@ -232,13 +254,16 @@ class Communication:
             self.client.publish(self.planet_Chan, select, qos=1)
             self.timer()
 
-        print("Muddas Richtung")
-        print(self.direc)
         if self.direc is None:
             return startDirPlanet
         else:
+            self.logger.warning("Mudda forced direction:")
+            self.logger.warning(self.direc)
             returnState = self.direc
             self.direc = None
+            # delete all paths
+            self.shortestPath = None
+            self.exploringPath = None
             return returnState
 
     # 6. pathSelect from Server:
@@ -256,10 +281,10 @@ class Communication:
         targetX = int(target["targetX"])
         targetY = int(target["targetY"])
         self.target = (targetX, targetY)
-        self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY),
-                                                      (targetX, targetY))
-        if self.shortestPath is not None or self.shortestPath:
-            self.exploringPath = None
+        # self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY),
+        #                                               (targetX, targetY))
+        # if self.shortestPath is not None or self.shortestPath:
+        #     self.exploringPath = None
 
     # 8. Abschluss der Erkundung:
     def target_Reached(self):
