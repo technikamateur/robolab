@@ -209,7 +209,7 @@ class Communication:
             self.target_Reached()
         # We have started running to target
         # but we have been interrupted
-        if self.running_target is not None:
+        if self.running_target is not None and self.shortestPath is None:
             self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY), self.target)
         # check existence of target and reachability
         if self.target is not None:
