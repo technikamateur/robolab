@@ -191,7 +191,13 @@ class Planet:
     def clean_unknown_paths(self):
         if self.paths:
             # regen list of unseenNodes
-            self.unseenNodes = [node for node in self.paths.keys() if node not in self.scannedNodes]
+            # criteria: not already scanned
+            # and less than 4 edges
+            self.unseenNodes = [
+                node for node in self.paths.keys()
+                if node not in self.scannedNodes
+                and len(list(self.paths[node].keys())) != 4
+            ]
 
             for known_key, known_value in self.paths.items():
                 known_directions = known_value.keys()
