@@ -33,6 +33,7 @@ def run():
 	if not com.node_scanned():
 		com.scan_result(bob.scanPoint(Direction.SOUTH))
 	bob.turn_by_direction(com.where_to_go())
+	playSound_telekom()
 	bob.drive()
 	while True:
 		#got to point
@@ -46,6 +47,7 @@ def run():
 		if direction is None:
 			playSound_weAreNumberOne()
 			break
+		playSound_telekom()
 		bob.turn_by_direction(direction)
 		bob.drive()
 

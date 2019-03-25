@@ -143,12 +143,13 @@ class Planet:
         :param weight: Integer
         :return: void
         """
-        self.logger.info("new path added")
         if weight > 0:
             if start[0] in self.paths:
                 # node in dict
-                self.paths[start[0]].update(
-                    {start[1]: (target[0], target[1], weight)})
+                if start[1] not in self.paths[start[0]]:
+                    self.paths[start[0]].update(
+                        {start[1]: (target[0], target[1], weight)})
+                    self.logger.info("new path added")
 
             elif start[0] not in self.paths:
                 # add node to dict
@@ -156,11 +157,13 @@ class Planet:
                     {start[0]: {
                          start[1]: (target[0], target[1], weight)
                      }})
+                self.logger.info("new path added")
 
             if target[0] in self.paths:
                 # node in dict
-                self.paths[target[0]].update(
-                    {target[1]: (start[0], start[1], weight)})
+                if target[1] not in self.paths[target[0]]:
+                    self.paths[target[0]].update(
+                        {target[1]: (start[0], start[1], weight)})
 
             elif target[0] not in self.paths:
                 # add node to dict
