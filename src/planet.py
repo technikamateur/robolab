@@ -45,7 +45,7 @@ class Planet:
             (0, 0): [Direction.NORTH, Direction.SOUTH, ...]
         }
         """
-        self.scannedNodes = []
+        self.scannedNodes = set()
         self.unseenNodes = []
         self.graph = None
         # creating logger
@@ -73,7 +73,7 @@ class Planet:
         new_unknown_paths = []
         for element in unknown_paths:
             new_unknown_paths.append(element[0])
-        self.scannedNodes.append(key)
+        self.scannedNodes.add(key)
         self.unknownPaths.update({key: new_unknown_paths})
 
     # direction with unknown path for node
@@ -190,17 +190,12 @@ class Planet:
 
     def clean_unknown_paths(self):
         if self.paths:
-            # regen list of unseenNodes
-            # criteria: not already scanned
-            # and less than 4 edges
-            self.unseenNodes = [
-                node for node in self.paths.keys()
-                if node not in self.scannedNodes
-                and len(list(self.paths[node].keys())) != 4
-            ]
 
             for known_key, known_value in self.paths.items():
                 known_directions = known_value.keys()
+                # append scannedNodes
+                if len(known_directions) == 4:
+                    self.scannedNodes.add(known_key)
                 if known_key in self.unknownPaths:
                     unknown_directions = self.unknownPaths[known_key]
                     new_unknown_paths = [
@@ -211,6 +206,13 @@ class Planet:
                         self.unknownPaths.pop(known_key, None)
                     else:
                         self.unknownPaths[known_key] = new_unknown_paths
+            # regen list of unseenNodes
+            # criteria: not already scanned
+            # and less than 4 edges
+            self.unseenNodes = [
+                node for node in self.paths.keys()
+                if node not in self.scannedNodes
+            ]
 
     # returns all paths
     def get_paths(
