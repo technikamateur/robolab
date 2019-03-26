@@ -158,9 +158,9 @@ class Robot:
 		self.checkMotorStop()
 
 	def mesureColor(self):									#returns "red" or "blue"
-		if self.cs.bin_data("hhh")[0] > self.cs.bin_data("hhh")[2] * 2.7:
+		if self.cs.bin_data("hhh")[0] > self.cs.bin_data("hhh")[2] * 2.5:
 			return "red"
-		elif self.cs.bin_data("hhh")[2] > self.cs.bin_data("hhh")[0] * 2.5:
+		elif self.cs.bin_data("hhh")[2] > self.cs.bin_data("hhh")[0] * 2.3:
 			return "blue"
 		else:
 			return "no color"

@@ -99,6 +99,8 @@ class shortestPathTestPlanet(unittest.TestCase):
                             ((16, 39), Direction.NORTH), -1)
 
     def test_shortest_path(self):
+        print("HI")
+        print(self.havok.shortest_path((17,38), (17,38)))
         self.assertEqual(
             self.havok.shortest_path((13, 37), (17, 38)),
             [((13, 37), Direction.NORTH), ((13, 38), Direction.NORTH),

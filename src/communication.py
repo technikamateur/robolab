@@ -202,15 +202,6 @@ class Communication:
 
     # 5. pathSelect Publish on planet:
     def where_to_go(self):
-        # we have reached target
-        if self.target == (self.aktX, self.aktY) or self.running_target == (self.aktX, self.aktY):
-            self.running_target = None
-            self.target = None
-            self.target_Reached()
-        # We have started running to target
-        # but we have been interrupted
-        if self.running_target is not None and self.shortestPath is None:
-            self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY), self.target)
         # check existence of target and reachability
         if self.target is not None:
             check_path_possible = self.planet.shortest_path((self.aktX, self.aktY), self.target)
@@ -219,6 +210,15 @@ class Communication:
                 self.running_target = self.target
                 self.target = None
                 self.exploringPath = None
+        # we have reached target
+        if self.running_target == (self.aktX, self.aktY) and self.target is None:
+            self.running_target = None
+            self.target_Reached()
+            return None
+        # We have started running to target
+        # but we have been interrupted
+        if self.running_target is not None and self.shortestPath is None:
+            self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY), self.target)
         # check if shortest path is running
         if self.shortestPath is None or not self.shortestPath:
             # check if there is a running path to a node to discover
