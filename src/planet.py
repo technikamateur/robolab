@@ -113,6 +113,7 @@ class Planet:
 
     # check whether node is already scanned
     def node_scanned(self, node):
+        self.clean_unknown_paths()
         if node in self.scannedNodes:
             self.logger.info("Node already scanned.")
             return True
