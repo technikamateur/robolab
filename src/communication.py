@@ -49,6 +49,8 @@ class Communication:
         self.target = None
         # store, that we are on se way
         self.running_target = None
+        self.got_message = False
+        self.target_reset = False
         self.logger = logging.getLogger('Com')
         logging.basicConfig(level=logging.DEBUG)
 
@@ -83,10 +85,17 @@ class Communication:
         while (time.time() - t0) < 3:
             pass
 
+    def timer_recieve_message(self):
+            t0 = time.time()
+            while (time.time() - t0) < 3 or not self.got_message:
+                pass
+            self.got_message = False
+
     def typ_Entsch(self):
         if self.data["from"] == "server" and self.data["type"] == "planet":
             self.setPlanetInfo()
         elif self.data["from"] == "server" and self.data["type"] == "path":
+            self.got_message = True
             self.set_korrePos()
         elif self.data["from"] == "server" and self.data[
                 "type"] == "pathUnveiled":
@@ -146,7 +155,7 @@ class Communication:
         self.client.publish(
             self.planet_Chan, pp,
             qos=1)  #planet/<CHANNEL>,<CHANNEL> = Planet name - 118
-        self.timer()
+        self.timer_recieve_message()
 
     # 4. Korregierte Position zu Planet schicken & Pfadaufdeckung und Pfadwahl:
     def set_korrePos(self):
@@ -202,23 +211,35 @@ class Communication:
 
     # 5. pathSelect Publish on planet:
     def where_to_go(self):
-        # we have reached target
-        if self.target == (self.aktX, self.aktY) or self.running_target == (self.aktX, self.aktY):
-            self.running_target = None
-            self.target = None
-            self.target_Reached()
-        # We have started running to target
-        # but we have been interrupted
-        if self.running_target is not None and self.shortestPath is None:
-            self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY), self.target)
-        # check existence of target and reachability
-        if self.target is not None:
+        if self.target is not None and self.shortestPath is None and not self.target_reset:
             check_path_possible = self.planet.shortest_path((self.aktX, self.aktY), self.target)
             if check_path_possible is not None:
                 self.shortestPath = check_path_possible
-                self.running_target = self.target
-                self.target = None
+                #self.running_target = self.target
+                #self.target = None
                 self.exploringPath = None
+        # check existence of target and reachability
+        if self.target is not None and self.target_reset:
+            check_path_possible = self.planet.shortest_path((self.aktX, self.aktY), self.target)
+            if check_path_possible is not None:
+                self.shortestPath = check_path_possible
+                #self.running_target = self.target
+                #self.target = None
+                self.exploringPath = None
+            else:
+                self.shortestPath = None
+            self.target_reset = False
+        # we have reached target
+        if self.target == (self.aktX, self.aktY):
+            self.target = None
+            self.target_Reached()
+            return None
+        # if self.running_target == (self.aktX, self.aktY) and self.target is None:
+        #     self.running_target = None
+        #     self.target_Reached()
+        #     return None
+        # We have started running to target
+        # but we have been interrupted
         # check if shortest path is running
         if self.shortestPath is None or not self.shortestPath:
             # check if there is a running path to a node to discover
@@ -281,6 +302,7 @@ class Communication:
         targetX = int(target["targetX"])
         targetY = int(target["targetY"])
         self.target = (targetX, targetY)
+        self.target_reset = True
         # self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY),
         #                                               (targetX, targetY))
         # if self.shortestPath is not None or self.shortestPath:

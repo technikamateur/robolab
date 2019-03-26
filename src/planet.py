@@ -45,9 +45,9 @@ class Planet:
             (0, 0): [Direction.NORTH, Direction.SOUTH, ...]
         }
         """
-        self.scannedNodes = []
+        self.scannedNodes = set()
+        self.unseenNodes = []
         self.graph = None
-        self.impossibleTarget = None
         # creating logger
         self.logger = logging.getLogger('Planet')
         logging.basicConfig(level=logging.DEBUG)
@@ -73,7 +73,7 @@ class Planet:
         new_unknown_paths = []
         for element in unknown_paths:
             new_unknown_paths.append(element[0])
-        self.scannedNodes.append(key)
+        self.scannedNodes.add(key)
         self.unknownPaths.update({key: new_unknown_paths})
 
     # direction with unknown path for node
@@ -84,7 +84,7 @@ class Planet:
     # returns path to next node from node
     def get_next_node(self, node):
         # maybe there are no paths to discover
-        if not self.unknownPaths:
+        if not self.unknownPaths and not self.unseenNodes:
             self.logger.info("Everything discovered. Finishing exploration.")
             return None
         self.logger.info("Performing graph creation...")
@@ -98,7 +98,9 @@ class Planet:
                 elif key not in graphList and targets[2] > 0:
                     # add node to dict
                     graphList.update({key: [targets[0]]})
-        graph = SearchableGraph(graphList, node, self.unknownPaths.keys())
+        intresting_nodes = list(self.unknownPaths.keys())
+        intresting_nodes.extend(self.unseenNodes)
+        graph = SearchableGraph(graphList, node, intresting_nodes)
         self.logger.info("...done")
         target = graph.find_next_node()
         if target is not None:
@@ -111,6 +113,7 @@ class Planet:
 
     # check whether node is already scanned
     def node_scanned(self, node):
+        self.clean_unknown_paths()
         if node in self.scannedNodes:
             self.logger.info("Node already scanned.")
             return True
@@ -124,8 +127,6 @@ class Planet:
         if node in self.unknownPaths:
             self.logger.info("Dicover Direction on current Node")
             return True
-        # elif not self.paths:
-        #     return True
         else:
             self.logger.info("Go to other node")
             return False
@@ -188,14 +189,14 @@ class Planet:
         else:
             self.logger.error("Path could not be added!")
 
-        if self.impossibleTarget is not None:
-            self.logger.error("There are unfound targets. Implement it now!")
-        # Now unknown paths should be cleaned
-
     def clean_unknown_paths(self):
         if self.paths:
+
             for known_key, known_value in self.paths.items():
                 known_directions = known_value.keys()
+                # append scannedNodes
+                if len(known_directions) == 4:
+                    self.scannedNodes.add(known_key)
                 if known_key in self.unknownPaths:
                     unknown_directions = self.unknownPaths[known_key]
                     new_unknown_paths = [
@@ -206,6 +207,13 @@ class Planet:
                         self.unknownPaths.pop(known_key, None)
                     else:
                         self.unknownPaths[known_key] = new_unknown_paths
+            # regen list of unseenNodes
+            # criteria: not already scanned
+            # and less than 4 edges
+            self.unseenNodes = [
+                node for node in self.paths.keys()
+                if node not in self.scannedNodes
+            ]
 
     # returns all paths
     def get_paths(
@@ -268,26 +276,19 @@ class Planet:
                 pathExDirection.reverse()
                 for edge in pathExDirection:
                     valueDict = self.paths[edge[0]]
+                    weight = {}
                     for keys, values in valueDict.items():
                         if edge[1] in values:
-                            shortestPath.append((edge[0], keys))
-                            break
-                        else:
-                            pass
+                            weight.update({values[2]: keys})
+                    smalles_element = min(weight.items(), key=lambda x: x[0])
+                    shortestPath.append((edge[0], smalles_element[1]))
                 shortestPath.reverse()
                 self.logger.info("Shortest Path:")
                 self.logger.info(shortestPath)
                 return shortestPath
             else:
-                self.logger.warning("Target (currently) not reachable")
+                self.logger.warning("Target (currently) not reachable.")
                 return None
         else:
-            self.logger.warning("Path invalid - saving this")
-            self.impossibleTarget = target
+            self.logger.warning("Path invalid.")
             return None
-
-    def getImpossibleTarget(self):
-        return self.impossibleTarget
-
-    def resetImpossibleTarget(self):
-        self.impossibleTarget = None
