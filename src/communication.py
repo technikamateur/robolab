@@ -18,11 +18,9 @@ class Communication:
         """ Initializes communication module, connect to server, subscribe, etc. """
         # THESE TWO VARIABLES MUST NOT BE CHANGED
         self.client = mqtt_client
-        #self.client.on_message = self.on_message
         self.planet = planet
         # ADD YOUR VARIABLES HERE
         # Basic configuration of MQTT
-        # Wichtig?
         self.client.on_message = self.on_message_excepthandler
 
         self.client.username_pw_set(
@@ -86,10 +84,10 @@ class Communication:
             pass
 
     def timer_recieve_message(self):
-            t0 = time.time()
-            while (time.time() - t0) < 3 or not self.got_message:
-                pass
-            self.got_message = False
+        t0 = time.time()
+        while (time.time() - t0) < 3 or not self.got_message:
+            pass
+        self.got_message = False
 
     def typ_Entsch(self):
         if self.data["from"] == "server" and self.data["type"] == "planet":
@@ -115,8 +113,6 @@ class Communication:
         # mess = '{"from": "client", "type": "testplanet", "payload": {"planetName":"Hawkeye"}}'
         self.client.publish("explorer/118", erk, qos=1)
         self.timer()
-        # self.client.publish("explorer/118", mess, qos=1)
-        # self.timer()
 
     # 2.PlanetName und StartKoordinanten übergeben
     def setPlanetInfo(self):
@@ -126,8 +122,6 @@ class Communication:
         self.client.subscribe(self.planet_Chan, qos=1)
         self.aktX = int(payload["startX"])
         self.aktY = int(payload["startY"])
-
-        #return (self.aktX, self.aktY)
 
     def get_startP(self):
         return (self.aktX, self.aktY)
@@ -174,11 +168,6 @@ class Communication:
 
         self.planet.add_path(((startX, startY), startDir),
                              ((endX, endY), endDir), weight)
-        # if self.planet.getImpossibleTarget() is not None:
-        #     self.shortestPath = self.planet.shortest_path(
-        #         (self.aktX, self.aktY), self.planet.getImpossibleTarget())
-        #     if self.shortestPath is not None:
-        #         self.planet.resetImpossibleTarget()
         return [(endX, endY), endDir]
 
     def get_korre_pos(self):
@@ -197,11 +186,6 @@ class Communication:
 
         self.planet.add_path(((startX, startY), startDir),
                              ((endX, endY), endDir), weight)
-        # if self.planet.getImpossibleTarget() is not None:
-        #     self.shortestPath = self.planet.shortest_path(
-        #         (endX, endY), self.planet.getImpossibleTarget())
-        #     if self.shortestPath is not None:
-        #         self.planet.resetImpossibleTarget()
 
     def node_scanned(self):
         return self.planet.node_scanned((self.aktX, self.aktY))
@@ -212,19 +196,17 @@ class Communication:
     # 5. pathSelect Publish on planet:
     def where_to_go(self):
         if self.target is not None and self.shortestPath is None and not self.target_reset:
-            check_path_possible = self.planet.shortest_path((self.aktX, self.aktY), self.target)
+            check_path_possible = self.planet.shortest_path(
+                (self.aktX, self.aktY), self.target)
             if check_path_possible is not None:
                 self.shortestPath = check_path_possible
-                #self.running_target = self.target
-                #self.target = None
                 self.exploringPath = None
         # check existence of target and reachability
         if self.target is not None and self.target_reset:
-            check_path_possible = self.planet.shortest_path((self.aktX, self.aktY), self.target)
+            check_path_possible = self.planet.shortest_path(
+                (self.aktX, self.aktY), self.target)
             if check_path_possible is not None:
                 self.shortestPath = check_path_possible
-                #self.running_target = self.target
-                #self.target = None
                 self.exploringPath = None
             else:
                 self.shortestPath = None
@@ -234,10 +216,6 @@ class Communication:
             self.target = None
             self.target_Reached()
             return None
-        # if self.running_target == (self.aktX, self.aktY) and self.target is None:
-        #     self.running_target = None
-        #     self.target_Reached()
-        #     return None
         # We have started running to target
         # but we have been interrupted
         # check if shortest path is running
@@ -303,10 +281,6 @@ class Communication:
         targetY = int(target["targetY"])
         self.target = (targetX, targetY)
         self.target_reset = True
-        # self.shortestPath = self.planet.shortest_path((self.aktX, self.aktY),
-        #                                               (targetX, targetY))
-        # if self.shortestPath is not None or self.shortestPath:
-        #     self.exploringPath = None
 
     # 8. Abschluss der Erkundung:
     def target_Reached(self):

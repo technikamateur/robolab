@@ -20,7 +20,6 @@ class Robot:
 		self.ml = ev3.LargeMotor("outB")
 		self.cs = ev3.ColorSensor()
 		self.ts = ev3.TouchSensor()
-		#self.cs.mode = "RGB-RAW"
 		self.d_wheel = 5.6
 		self.d_axis = 12
 		self.oldposition = (0,0)

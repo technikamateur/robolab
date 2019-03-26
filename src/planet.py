@@ -53,10 +53,6 @@ class Planet:
         logging.basicConfig(level=logging.DEBUG)
 
 
-# ((a, b), c)
-# start[1]
-#d.update({key:value})
-
 # adds unknown paths
 
     def add_unknown_paths(self, node):
